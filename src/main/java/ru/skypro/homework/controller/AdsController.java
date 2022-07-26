@@ -47,7 +47,7 @@ public class AdsController {
      * Удалить объявление по его идентификатору, то-есть по id. Должна одновременно
      * удаляться и соответствующая картинка (при ее наличии) в таблице картинок
      * DELETE http://localhost:8080/ads/{id}
-     * @param id
+     * @param id идентификатор
      **/
     @DeleteMapping("/{id}")
     public ResponseEntity<Ads> deleteAds(@PathVariable Long id) {
@@ -58,7 +58,7 @@ public class AdsController {
     /**
      * Получить объявление по его идентификатору, то-есть по id
      * GET http://localhost:8080/ads/{id}
-     * @param id
+     * @param id идентификатор
      **/
     @GetMapping("/{id}")
     public ResponseEntity<Ads> getAdsById(@PathVariable long id) {
@@ -69,7 +69,7 @@ public class AdsController {
 
     /** Редактировать объявление по его идентификатору,
      * PUT http://localhost:8080/ads/{id}
-     * @param id
+     * @param id идентификатор
      * @param ads
      **/
     @PutMapping("/{id}")
