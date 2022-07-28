@@ -5,9 +5,9 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class AdsComment {
-    private Integer author;
+public class AdsCommentDto {
+    private Long idAuthor;
     private LocalDateTime createdAt;
-    private Integer pk;
+    private Long pk;
     private String text;
 }
