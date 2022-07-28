@@ -24,6 +24,12 @@ import java.util.Collection;
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    /**
+     * POST <a href="http://localhost:3000/users">...</a>
+     * Добавление пользователя.
+     * @param user пользователь
+     * @return добавленный пользователь в формате json
+     */
     @Operation(
             summary = "Добавление нового пользователя",
             description = "Позволяет добавить пользователя в базу данных"
@@ -34,6 +40,11 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    /**
+     * Получить пользователя по его идентификатору, то-есть по id
+     * GET <a href="http://localhost:3000/users/">...</a>{id}
+     * @param id идентификатор
+     **/
     @Operation(
             summary = "Поиск пользователя",
             description = "Позволяет найти пользователя по идентификатору",
@@ -51,6 +62,10 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
+    /** Редактировать пользователя,
+     * PUT <a href="http://localhost:3000/ads/">...</a>{id}
+     * @param user пользователь, которого надо обновить
+     **/
     @Operation(
             summary = "Обновить пользователя",
             description = "Позволяет обновить данные пользователя находящегося в базе данных",
@@ -68,6 +83,11 @@ public class UserController {
         return ResponseEntity.ok(newUser);
     }
 
+    /**
+     * Установить новый пароль GET <a href="http://localhost:3000/users">...</a>
+     * @param currentPassword текущий пароль
+     * @param newPassword новый пароль
+     **/
     @Operation(
             summary = "Установить новый пароль",
             description = "Позволяет установить новый пароль пользователю",
@@ -78,19 +98,27 @@ public class UserController {
                     )
             }
     )
-    @PostMapping
-    public ResponseEntity<?> setPassword(@PathVariable String currentPassword, @PathVariable String newPassword){
+    @PostMapping(params = "newPassword")
+    public ResponseEntity<?> setPassword(@RequestParam(value = "currentPassword") String currentPassword,
+                                         @RequestParam(value = "newPassword") String newPassword){
         logger.info("Method setPassword is running: {} {}", currentPassword, newPassword);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
+    /**
+     * Получить всех пользователей GET <a href="http://localhost:3000/users">...</a>
+     **/
     @Operation(
             summary = "Получить всех пользователей",
             description = "Позволяет получить всех пользователей из базы данных"
     )
     @GetMapping("/me")
-    public Collection<UserDto> getUsers(){
+    public ResponseEntity<Collection<UserDto>> getUsers(){
         logger.info("Method getUsers is running");
-        return new ArrayList<>();
+        Collection<UserDto> users = new ArrayList<>();
+        if (!users.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(users);
     }
 }

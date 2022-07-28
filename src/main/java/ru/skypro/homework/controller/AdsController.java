@@ -3,28 +3,33 @@ package ru.skypro.homework.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.Ads;
-import ru.skypro.homework.dto.AdsComment;
+import ru.skypro.homework.dto.AdsCommentDto;
+import ru.skypro.homework.dto.AdsDto;
 
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
-import static org.springframework.http.ResponseEntity.ok;
-
+@Slf4j
+@CrossOrigin(value = "http://localhost:3000")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/ads")
 @Tag(name = "Контроллер Объявлений и Отзывов", description = "добавление, поиск, изменение и удаление Объявлений и Отзывов")
 public class AdsController {
 
-//    private final AdsService adsService;
-//
-//    public AdsController(AdsService adsService) {
-//        this.adsService = adsService;
-//    }
+    private final Logger logger = LoggerFactory.getLogger(AdsController.class);
 
     /**
-     * Получить все существующие объявления GET http://localhost:8080/ads
+     * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
      **/
     @Operation(
             summary = "Получить все объявления",
@@ -37,133 +42,63 @@ public class AdsController {
             }
     )
     @GetMapping
-    public ResponseEntity<List<Ads>> getAllAds() {
-//        List<Ads> listOfAds = adsService.getAdsAll();
-        List<Ads> listOfAds = null;
-//        if (listOfAds.size() == 0) {
-//            return ResponseEntity.notFound().build();
-//        }
+    public ResponseEntity<Collection<AdsDto>> getAllAds() {
+        logger.info("Method getAllAds is running");
+        Collection<AdsDto> listOfAds = new ArrayList<>();
+        if (!listOfAds.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(listOfAds);
     }
 
     /**
-     * POST http://localhost:8080/ads
-     * Создание объявления.
+     * POST <a href="http://localhost:3000/ads">...</a>
+     * Добавление объявления.
      * @param ads объявление
      * @return добавленное объявление в формате json
      */
     @Operation(
-            summary = "Создать объявление",
-            description = "Создание нового объявления",
+            summary = "Добавить объявление",
+            description = "Добавление нового объявления",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Объявление создано"
+                            description = "Объявление добавлено"
                     )
             }
     )
     @PostMapping
-    public Ads createAds(@RequestBody Ads ads) {
-//        return adsService.addAds(ads);
-        return ads;
+    public ResponseEntity<AdsDto> addAds(@RequestBody AdsDto ads) {
+        logger.info("Method addAds is running: {}", ads);
+        AdsDto addedAds = new AdsDto();
+        return ResponseEntity.ok(addedAds);
     }
 
     /**
-     * Удалить объявление по его идентификатору, то-есть по id. Должна одновременно
-     * удаляться и соответствующая картинка (при ее наличии) в таблице картинок
-     * DELETE http://localhost:8080/ads/{id}
-     * @param id идентификатор
+     * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
      **/
     @Operation(
-            summary = "Удалить объявление",
-            description = "Удаление объявления по его идентификатору",
+            summary = "Получить все объявления автора",
+            description = "Получение всех объявлений автора",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "Объявление удалено"
+                            description = "Объявления получены"
                     )
             }
     )
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Ads> deleteAds(@PathVariable Integer id) {
-//        adsService.deleteAds(id);
-        return ok().build();
+    @GetMapping(value = "/me", params = {"idAuthor"})
+    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") Long idAuthor){
+        logger.info("Method getAdsMe is running: {}", idAuthor);
+        List<AdsDto> listMeAds = new ArrayList<>();
+        if (!listMeAds.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(listMeAds);
     }
 
     /**
-     * Получить объявление по его идентификатору, то-есть по id
-     * GET http://localhost:8080/ads/{id}
-     * @param id идентификатор
-     **/
-    @Operation(
-            summary = "Найти объявление",
-            description = "Найти объявление по его идентификатору",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Объявление найдено"
-                    )
-            }
-    )
-    @GetMapping("/{id}")
-    public ResponseEntity<Ads> getAdsById(@PathVariable Integer id) {
-//        Ads ads = adsService.getAdsById(id);
-//        return ok(ads);
-        return ok().build();
-    }
-
-    /** Редактировать объявление по его идентификатору,
-     * PUT http://localhost:8080/ads/{id}
-     * @param id идентификатор
-     * @param ads
-     **/
-    @Operation(
-            summary = "Изменить объявление",
-            description = "Редактирование объявления с указанным идентификатором",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Объявление отредактировано"
-                    )
-            }
-    )
-    @PutMapping("/{id}")
-    public ResponseEntity<Ads> updateAds(@RequestBody Ads ads, @PathVariable Integer id) {
-//        Ads editAds = adsService.editAds(ads, id);
-//        if (editAds == null) {
-//            return ResponseEntity.notFound().build();
-//        }
-//        return ok(editAds);
-        return ResponseEntity.ok(ads);
-    }
-
-    /**
-     * POST http://localhost:8080/ads/{ad_pk}/comment
-     * Создание отзыва(комментария) к объявлению. Объявление должно существовать.
-     * Используется идентификатор объявления "ad_pk"
-     * @param adsComment объявление
-     * @param ad_pk идентификатор объявления
-     * @return добавленное объявление в формате json
-     */
-    @Operation(
-            summary = "Создать отзыв",
-            description = "Создание нового отзыва к указанному объявлению",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Отзыв создан"
-                    )
-            }
-    )
-    @PostMapping("/{ad_pk}/comment")
-    public AdsComment createAdsComment(@RequestBody AdsComment adsComment, @PathVariable String ad_pk) {
-        // проверить наличие такого объявления!
-//        return adsCommentService.addAdsComment(adsComment);
-        return adsComment;
-    }
-
-    /**
-     * Получить все комментарии(отзывы) к объявлению GET http://localhost:8080/ads/{ad_pk}/comment
+     * Получить все комментарии(отзывы) к объявлению GET <a href="http://localhost:3000/ads/">...</a>{ad_pk}/comment
      * Объявление должно существовать. Используется идентификатор объявления "ad_pk"
      * @param ad_pk идентификатор объявления
      **/
@@ -177,14 +112,173 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping("/{ad_pk}/comment")
-    public ResponseEntity<List<AdsComment>> getAdsComments(String ad_pk) {
-//        List<AdsComment> listOfAdsComment = adsCommentService.getAdsComments(ad_pk);
-        List<AdsComment> listOfAdsComment = null;
-//        if (listOfAdsComment.size() == 0) {
-//            return ResponseEntity.notFound().build();
-//        }
+    @GetMapping(value = "/{ad_pk}/comment")
+    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable String ad_pk) {
+        logger.info("Method getAdsComments is running: {}", ad_pk);
+        Collection<AdsCommentDto> listOfAdsComment = new ArrayList<>();
+        if (!listOfAdsComment.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(listOfAdsComment);
+    }
+
+    /**
+     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
+     * Добавление комментария к объявлению.
+     * @param ad_pk идентификатор объявления
+     * @return добавленный комментарий к объявлению в формате json
+     */
+    @Operation(
+            summary = "Добавить комментарий к объявлению",
+            description = "Добавление нового комментария к объявлению",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Комментарий к объявлению добавлен"
+                    )
+            }
+    )
+    @PostMapping("/{ad_pk}/comment")
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable String ad_pk){
+        logger.info("Method addAdsComment is running: {}", ad_pk);
+        AdsCommentDto commentToAds = new AdsCommentDto();
+        return ResponseEntity.ok(commentToAds);
+    }
+
+    /**
+     * DELETE <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment/{id}
+     * Удаление комментария к объявлению.
+     * @param ad_pk идентификатор объявления
+     * @param id идентификатор комментария к объявлению
+     * @return статус ок если успешно был удален комментарий
+     */
+    @Operation(
+            summary = "Удалить комментарий к объявлению",
+            description = "Удаление комментария к объявлению",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Комментарий к объявлению удален"
+                    )
+            }
+    )
+    @DeleteMapping("/{ad_pk}/comment/{id}")
+    public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk, @PathVariable Long id){
+        logger.info("Method deleteAdsComment is running: {} {}", ad_pk, id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
+     * Получение комментария к объявлению.
+     * @param ad_pk идентификатор объявления
+     * @param id идентификатор
+     * @return комментарий к объявлению в формате json
+     */
+    @Operation(
+            summary = "Получить комментарий к объявлению",
+            description = "Получение нового комментария к объявлению",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Комментарий к объявлению получен"
+                    )
+            }
+    )
+    @GetMapping("/{ad_pk}/comment/{id}")
+    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable String ad_pk, @PathVariable Long id){
+        logger.info("Method getAdsComment is running: {} {}", ad_pk, id);
+        AdsCommentDto foundAdsComment = new AdsCommentDto();
+        return ResponseEntity.ok(foundAdsComment);
+    }
+
+    /**
+     * Удалить объявление по его идентификатору, то-есть по id. Должна одновременно
+     * удаляться и соответствующая картинка (при ее наличии) в таблице картинок
+     * DELETE <a href="http://localhost:3000/ads/{">...</a>id}
+     * @param id идентификатор
+     **/
+    @Operation(
+            summary = "Удалить объявление",
+            description = "Удаление объявления по его идентификатору",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявление удалено"
+                    )
+            }
+    )
+    @DeleteMapping("/{id}")
+    public ResponseEntity<AdsDto> removeAds(@PathVariable Long id) {
+        logger.info("Method removeAds is running: {}", id);
+        return ResponseEntity.status(HttpStatus.OK).build();
+    }
+
+    /**
+     * Получить объявление по его идентификатору, то-есть по id
+     * GET <a href="http://localhost:3000/ads/">...</a>{id}
+     * @param id идентификатор
+     **/
+    @Operation(
+            summary = "Найти объявление",
+            description = "Найти объявление по его идентификатору",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявление найдено"
+                    )
+            }
+    )
+    @GetMapping("/{id}")
+    public ResponseEntity<AdsDto> getAds(@PathVariable Long id) {
+        logger.info("Method getAds is running: {}", id);
+        return ResponseEntity.ok().build();
+    }
+
+    /** Редактировать объявление по его идентификатору,
+     * PUT <a href="http://localhost:3000/ads/">...</a>{id}
+     * @param id идентификатор
+     * @param ads объявление
+     **/
+    @Operation(
+            summary = "Редактировать объявление",
+            description = "Редактирование объявления с указанным идентификатором",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявление отредактировано"
+                    )
+            }
+    )
+    @PutMapping("/{id}")
+    public ResponseEntity<AdsDto> updateAds(@RequestBody AdsDto ads, @PathVariable Long id) {
+        logger.info("Method updateAds is running: {} {}", ads, id);
+        return ResponseEntity.ok().build();
+    }
+
+    /**
+     * POST <a href="http://localhost:3000/ads/">...</a>{ad_pk}/comment
+     * Обновление отзыва(комментария) к объявлению. Объявление должно существовать.
+     * Используется идентификатор объявления "ad_pk"
+     * @param adsComment коментарий к объявлению
+     * @param ad_pk идентификатор объявления
+     * @return обновленный комментарий в формате json
+     */
+    @Operation(
+            summary = "Обновить комментарий",
+            description = "Обновление комментария к существующему объявлению",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Комментарий обновлен"
+                    )
+            }
+    )
+    @PostMapping("/{ad_pk}/comment")
+    public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody AdsCommentDto adsComment, @PathVariable String ad_pk) {
+        logger.info("Method createAdsComment is running: {} {}", adsComment, ad_pk);
+        AdsCommentDto comment = new AdsCommentDto();
+        return ResponseEntity.created(URI.create("")).body(comment);
     }
 
 }
