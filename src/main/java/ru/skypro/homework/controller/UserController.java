@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.skypro.homework.dto.CreateUserDto;
+import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
 
 import java.util.ArrayList;
@@ -35,7 +37,7 @@ public class UserController {
             description = "Позволяет добавить пользователя в базу данных"
     )
     @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody UserDto user){
+    public ResponseEntity<CreateUserDto> addUser(@RequestBody CreateUserDto user){
         logger.info("Method addUser is running: {}", user);
         return ResponseEntity.ok(user);
     }
@@ -58,8 +60,7 @@ public class UserController {
     @GetMapping("{/id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id){
         logger.info("Method getUser is running: {}", id);
-        UserDto user = new UserDto();
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(new UserDto());
     }
 
     /** Редактировать пользователя,
@@ -79,14 +80,12 @@ public class UserController {
     @PatchMapping("/me")
     public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user){
         logger.info("Method updateUser is running: {}", user);
-        UserDto newUser = new UserDto();
-        return ResponseEntity.ok(newUser);
+        return ResponseEntity.ok(user);
     }
 
     /**
      * Установить новый пароль GET <a href="http://localhost:3000/users">...</a>
-     * @param currentPassword текущий пароль
-     * @param newPassword новый пароль
+     * @param password новый пароль
      **/
     @Operation(
             summary = "Установить новый пароль",
@@ -98,11 +97,10 @@ public class UserController {
                     )
             }
     )
-    @PostMapping(params = "newPassword")
-    public ResponseEntity<?> setPassword(@RequestParam(value = "currentPassword") String currentPassword,
-                                         @RequestParam(value = "newPassword") String newPassword){
-        logger.info("Method setPassword is running: {} {}", currentPassword, newPassword);
-        return ResponseEntity.status(HttpStatus.OK).build();
+    @PostMapping("/set_password")
+    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password){
+        logger.info("Method setPassword is running: {}", password);
+        return ResponseEntity.status(HttpStatus.OK).body(password);
     }
 
     /**
