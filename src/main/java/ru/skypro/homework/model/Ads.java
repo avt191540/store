@@ -27,15 +27,14 @@ public class Ads {
     private String email;
     @Column(name = "price")
     private Integer price;
+    @ManyToOne
+    @JoinColumn(name = "id")
+    private User user;
     @OneToMany(mappedBy = "ads", cascade=CascadeType.ALL)
     @JsonIgnore
     private Collection<Picture> pictures;
     @OneToMany(mappedBy = "ads", cascade=CascadeType.ALL)
     @JsonIgnore
     private Collection<AdsComment> adsComments;
-    @ManyToOne
-    @JoinColumn(name = "id")
-    private User user;
-
 
 }
