@@ -12,8 +12,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
+import ru.skypro.homework.dto.FullAdsDto;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -68,10 +69,9 @@ public class AdsController {
             }
     )
     @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody AdsDto ads) {
+    public ResponseEntity<CreateAdsDto> addAds(@RequestBody CreateAdsDto ads) {
         logger.info("Method addAds is running: {}", ads);
-        AdsDto addedAds = new AdsDto();
-        return ResponseEntity.ok(addedAds);
+        return ResponseEntity.ok(ads);
     }
 
     /**
@@ -90,11 +90,11 @@ public class AdsController {
     @GetMapping(value = "/me", params = {"idAuthor"})
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
-        List<AdsDto> listMeAds = new ArrayList<>();
-        if (!listMeAds.isEmpty()) {
+        List<AdsDto> listAdsMe = new ArrayList<>();
+        if (!listAdsMe.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(listMeAds);
+        return ResponseEntity.ok(listAdsMe);
     }
 
     /**
@@ -120,29 +120,6 @@ public class AdsController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(listOfAdsComment);
-    }
-
-    /**
-     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
-     * Добавление комментария к объявлению.
-     * @param ad_pk идентификатор объявления
-     * @return добавленный комментарий к объявлению в формате json
-     */
-    @Operation(
-            summary = "Добавить комментарий к объявлению",
-            description = "Добавление нового комментария к объявлению",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Комментарий к объявлению добавлен"
-                    )
-            }
-    )
-    @PostMapping("/{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable String ad_pk){
-        logger.info("Method addAdsComment is running: {}", ad_pk);
-        AdsCommentDto commentToAds = new AdsCommentDto();
-        return ResponseEntity.ok(commentToAds);
     }
 
     /**
@@ -209,7 +186,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<AdsDto> removeAds(@PathVariable Long id) {
+    public ResponseEntity<?> removeAds(@PathVariable Long id) {
         logger.info("Method removeAds is running: {}", id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -230,7 +207,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<AdsDto> getAds(@PathVariable Long id) {
+    public ResponseEntity<FullAdsDto> getAds(@PathVariable Long id) {
         logger.info("Method getAds is running: {}", id);
         return ResponseEntity.ok().build();
     }
@@ -257,11 +234,36 @@ public class AdsController {
     }
 
     /**
+     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
+     * Добавление комментария к объявлению.
+     * @param ad_pk идентификатор объявления
+     * @param adsComment комментарий
+     * @return добавленный комментарий к объявлению в формате json
+     */
+    @Operation(
+            summary = "Добавить комментарий к объявлению",
+            description = "Добавление нового комментария к объявлению",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Комментарий к объявлению добавлен"
+                    )
+            }
+    )
+    @PostMapping(value = "/{ad_pk}/comment", params = {"ad_pk", "adsComment"})
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable String ad_pk,
+                                                       @RequestBody AdsCommentDto adsComment){
+        logger.info("Method addAdsComment is running: {} {}", ad_pk, adsComment);
+        return ResponseEntity.ok(adsComment);
+    }
+
+    /**
      * POST <a href="http://localhost:3000/ads/">...</a>{ad_pk}/comment
      * Обновление отзыва(комментария) к объявлению. Объявление должно существовать.
      * Используется идентификатор объявления "ad_pk"
      * @param adsComment коментарий к объявлению
      * @param ad_pk идентификатор объявления
+     * @param id идентификатор
      * @return обновленный комментарий в формате json
      */
     @Operation(
@@ -274,11 +276,11 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping("/{ad_pk}/comment")
-    public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody AdsCommentDto adsComment, @PathVariable String ad_pk) {
-        logger.info("Method createAdsComment is running: {} {}", adsComment, ad_pk);
-        AdsCommentDto comment = new AdsCommentDto();
-        return ResponseEntity.created(URI.create("")).body(comment);
+    @PostMapping(value = "/{ad_pk}/comment/{id}", params = {"ad_pk", "adsComment", "id"})
+    public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody AdsCommentDto adsComment,
+                                                          @PathVariable String ad_pk,
+                                                          @PathVariable Long id) {
+        logger.info("Method createAdsComment is running: {} {} {}", adsComment, ad_pk, id);
+        return ResponseEntity.ok(adsComment);
     }
-
 }
