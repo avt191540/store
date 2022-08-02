@@ -15,19 +15,12 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_user", unique = true)
     private Long id;
-    @Column(name = "userName")
     private String userName;
-    @Column(name = "firstName")
     private String firstName;
-    @Column(name = "lastName")
     private String lastName;
-    @Column(name = "phone")
     private String phone;
-    @Column(name = "email")
     private String email;
-    @Column(name = "password")
     private String password;
-    @Column(name = "role")
     private Role role;
     @OneToMany(mappedBy = "user", cascade=CascadeType.ALL)
     @JsonIgnore

@@ -5,16 +5,13 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ads_Comment")
+@Table(name = "ads_comments")
 public class AdsComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_adsComment", unique = true)
     private Long id;
-    @Column(name = "createdAt")
     private LocalDateTime createdAt;
-    @Column(name = "text")
     private String text;
     @ManyToOne
     @JoinColumn(name = "id_user")

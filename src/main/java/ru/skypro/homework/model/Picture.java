@@ -10,14 +10,10 @@ public class Picture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_picture", unique = true)
     private long id;
-    @Column(name = "fileSize")
     private long fileSize;
-    @Column(name = "mediaType")
     private String mediaType;
     @Lob
-    @Column(name = "data")
     private byte[] data;
 
     @ManyToOne

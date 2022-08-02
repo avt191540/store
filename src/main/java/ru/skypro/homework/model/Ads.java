@@ -7,26 +7,19 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ads")
+@Table(name = "advertisements")
 public class Ads {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ads", unique = true)
     private Long id;
-    @Column(name = "authorFirstName")
     private String authorFirstName;
-    @Column(name = "authorLastName")
     private String authorLastName;
-    @Column(name = "title")
     private String title;
-    @Column(name = "description")
     private String description;
-    @Column(name = "phone")
     private String phone;
-    @Column(name = "email")
     private String email;
-    @Column(name = "price")
     private Integer price;
     @ManyToOne
     @JoinColumn(name = "id_user")
