@@ -14,12 +14,12 @@ public class Ads {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_ads", unique = true)
     private Long id;
-    private String authorFirstName;
-    private String authorLastName;
+//    private String authorFirstName;
+//    private String authorLastName;
     private String title;
     private String description;
-    private String phone;
-    private String email;
+//    private String phone;
+//    private String email;
     private Integer price;
     @ManyToOne
     @JoinColumn(name = "id_user")
@@ -33,12 +33,12 @@ public class Ads {
 
     public Ads(Long id, String authorFirstName, String authorLastName, String title, String description, String phone, String email, Integer price) {
         this.id = id;
-        this.authorFirstName = authorFirstName;
-        this.authorLastName = authorLastName;
+//        this.authorFirstName = authorFirstName;
+//        this.authorLastName = authorLastName;
         this.title = title;
         this.description = description;
-        this.phone = phone;
-        this.email = email;
+//        this.phone = phone;
+//        this.email = email;
         this.price = price;
     }
 
@@ -53,21 +53,21 @@ public class Ads {
         this.id = id;
     }
 
-    public String getAuthorFirstName() {
-        return authorFirstName;
-    }
-
-    public void setAuthorFirstName(String authorFirstName) {
-        this.authorFirstName = authorFirstName;
-    }
-
-    public String getAuthorLastName() {
-        return authorLastName;
-    }
-
-    public void setAuthorLastName(String authorLastName) {
-        this.authorLastName = authorLastName;
-    }
+//    public String getAuthorFirstName() {
+//        return authorFirstName;
+//    }
+//
+//    public void setAuthorFirstName(String authorFirstName) {
+//        this.authorFirstName = authorFirstName;
+//    }
+//
+//    public String getAuthorLastName() {
+//        return authorLastName;
+//    }
+//
+//    public void setAuthorLastName(String authorLastName) {
+//        this.authorLastName = authorLastName;
+//    }
 
     public String getTitle() {
         return title;
@@ -85,21 +85,21 @@ public class Ads {
         this.description = description;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+//    public String getPhone() {
+//        return phone;
+//    }
+//
+//    public void setPhone(String phone) {
+//        this.phone = phone;
+//    }
+//
+//    public String getEmail() {
+//        return email;
+//    }
+//
+//    public void setEmail(String email) {
+//        this.email = email;
+//    }
 
     public Integer getPrice() {
         return price;
@@ -138,24 +138,26 @@ public class Ads {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Ads ads = (Ads) o;
-        return id.equals(ads.id) && authorFirstName.equals(ads.authorFirstName) && authorLastName.equals(ads.authorLastName) && title.equals(ads.title) && description.equals(ads.description) && phone.equals(ads.phone) && email.equals(ads.email) && price.equals(ads.price) && user.equals(ads.user) && pictures.equals(ads.pictures) && adsComments.equals(ads.adsComments);
+        return id.equals(ads.id) && title.equals(ads.title) && description.equals(ads.description) && price.equals(ads.price) && user.equals(ads.user) && pictures.equals(ads.pictures) && adsComments.equals(ads.adsComments);
+//        return id.equals(ads.id) && authorFirstName.equals(ads.authorFirstName) && authorLastName.equals(ads.authorLastName) && title.equals(ads.title) && description.equals(ads.description) && phone.equals(ads.phone) && email.equals(ads.email) && price.equals(ads.price) && user.equals(ads.user) && pictures.equals(ads.pictures) && adsComments.equals(ads.adsComments);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, authorFirstName, authorLastName, title, description, phone, email, price, user, pictures, adsComments);
+        return Objects.hash(id, title, description, price, user, pictures, adsComments);
+//        return Objects.hash(id, authorFirstName, authorLastName, title, description, phone, email, price, user, pictures, adsComments);
     }
 
     @Override
     public String toString() {
         return "Ads{" +
                 "id=" + id +
-                ", authorFirstName='" + authorFirstName + '\'' +
-                ", authorLastName='" + authorLastName + '\'' +
+//                ", authorFirstName='" + authorFirstName + '\'' +
+//                ", authorLastName='" + authorLastName + '\'' +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
-                ", phone='" + phone + '\'' +
-                ", email='" + email + '\'' +
+//                ", phone='" + phone + '\'' +
+//                ", email='" + email + '\'' +
                 ", price=" + price +
                 ", user=" + user +
                 '}';
