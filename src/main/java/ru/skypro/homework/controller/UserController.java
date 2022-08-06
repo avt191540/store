@@ -9,27 +9,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
+import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.model.User;
+import ru.skypro.homework.service.UserService;
 
-import java.util.ArrayList;
+import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/users")
 @Tag(name = "Контроллер пользователей", description = "добавление, обновление, удаление и другие операции с пользователями")
 public class UserController {
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    private final UserService userService;
+
     /**
      * POST <a href="http://localhost:3000/users">...</a>
      * Добавление пользователя.
-     * @param user пользователь
+     * @param createUser пользователь
      * @return добавленный пользователь в формате json
      */
     @Operation(
@@ -37,9 +46,12 @@ public class UserController {
             description = "Позволяет добавить пользователя в базу данных"
     )
     @PostMapping
-    public ResponseEntity<CreateUserDto> addUser(@RequestBody CreateUserDto user){
-        logger.info("Method addUser is running: {}", user);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserDto> addUser(@RequestBody @Valid CreateUserDto createUser){
+        logger.info("Method addUser is running: {}", createUser);
+        if (createUser == null){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
+        return ResponseEntity.ok(userService.addUser(createUser));
     }
 
     /**
@@ -58,9 +70,11 @@ public class UserController {
             }
     )
     @GetMapping("{/id}")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id){
+    public ResponseEntity<User> getUser(@PathVariable @Min(1) Long id){
         logger.info("Method getUser is running: {}", id);
-        return ResponseEntity.ok(new UserDto());
+        User foundUser = userService.getUserById(id).orElseThrow(() -> new
+                ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id));
+        return ResponseEntity.ok(foundUser);
     }
 
     /** Редактировать пользователя,
@@ -78,9 +92,16 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto user){
+    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user){
         logger.info("Method updateUser is running: {}", user);
-        return ResponseEntity.ok(user);
+        UserDto updateUser;
+        try {
+            updateUser = userService.updateUser(user);
+        }
+        catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(updateUser);
     }
 
     /**
@@ -113,10 +134,10 @@ public class UserController {
     @GetMapping("/me")
     public ResponseEntity<Collection<UserDto>> getUsers(){
         logger.info("Method getUsers is running");
-        Collection<UserDto> users = new ArrayList<>();
-        if (!users.isEmpty()) {
+        Collection<UserDto> usersDto = userService.getAllUsers();
+        if (usersDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(usersDto);
     }
 }

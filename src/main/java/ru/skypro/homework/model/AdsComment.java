@@ -5,11 +5,12 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-@Table(name = "ads_comments")
+@Table(name = "comments")
 public class AdsComment {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id_comment", unique = true)
     private Long id;
     private LocalDateTime createdAt;
     private String text;
@@ -76,7 +77,8 @@ public class AdsComment {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         AdsComment that = (AdsComment) o;
-        return id.equals(that.id) && createdAt.equals(that.createdAt) && text.equals(that.text) && user.equals(that.user) && ads.equals(that.ads);
+        return id.equals(that.id) && createdAt.equals(that.createdAt) && text.equals(that.text)
+                && user.equals(that.user) && ads.equals(that.ads);
     }
 
     @Override

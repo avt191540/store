@@ -9,12 +9,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.service.AdsService;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -23,11 +26,14 @@ import java.util.List;
 @CrossOrigin(value = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
+@Validated
 @RequestMapping("/ads")
 @Tag(name = "Контроллер Объявлений и Отзывов", description = "добавление, поиск, изменение и удаление Объявлений и Отзывов")
 public class AdsController {
 
     private final Logger logger = LoggerFactory.getLogger(AdsController.class);
+
+    private final AdsService adsService;
 
     /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
@@ -55,7 +61,7 @@ public class AdsController {
     /**
      * POST <a href="http://localhost:3000/ads">...</a>
      * Добавление объявления.
-     * @param ads объявление
+     * @param createAds объявление
      * @return добавленное объявление в формате json
      */
     @Operation(
@@ -69,9 +75,9 @@ public class AdsController {
             }
     )
     @PostMapping
-    public ResponseEntity<CreateAdsDto> addAds(@RequestBody CreateAdsDto ads) {
-        logger.info("Method addAds is running: {}", ads);
-        return ResponseEntity.ok(ads);
+    public ResponseEntity<AdsDto> addAds(@RequestBody @Valid CreateAdsDto createAds) {
+        logger.info("Method addAds is running: {}", createAds);
+        return ResponseEntity.ok(adsService.addAds(createAds));
     }
 
     /**

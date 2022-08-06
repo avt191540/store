@@ -1,6 +1,9 @@
 package ru.skypro.homework.dto;
 
 import lombok.Data;
+import ru.skypro.homework.model.Picture;
+
+import java.util.Collection;
 
 @Data
 public class FullAdsDto {
@@ -8,9 +11,9 @@ public class FullAdsDto {
     private String authorLastName;
     private String description;
     private String email;
-    private String image;
+    private Collection<Picture> image;
     private String phone;
-    private Integer pk;
+    private Long pk;
     private Integer price;
     private String title;
 

@@ -1,7 +1,9 @@
 package ru.skypro.homework.service;
 
-import org.springframework.stereotype.Service;
+import ru.skypro.homework.dto.AdsDto;
+import ru.skypro.homework.dto.CreateAdsDto;
 
-@Service
-public class AdsService {
+public interface AdsService {
+
+    AdsDto addAds(CreateAdsDto createAdsDto);
 }
