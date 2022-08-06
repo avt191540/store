@@ -10,8 +10,10 @@ public class Picture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-    private long fileSize;
+    @Column(name = "id_picture", unique = true)
+    private Long id;
+    private Integer fileSize;
+    private String filePath;
     private String mediaType;
     @Lob
     private byte[] data;
@@ -20,20 +22,38 @@ public class Picture {
     @JoinColumn(name = "id_ads")
     private Ads ads;
 
-    public long getId() {
+    public Picture() {
+    }
+
+    public Picture(Long id, Integer fileSize, String filePath, String mediaType) {
+        this.id = id;
+        this.fileSize = fileSize;
+        this.filePath = filePath;
+        this.mediaType = mediaType;
+    }
+
+    public Long getId() {
         return id;
     }
 
-    public void setId(long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
-    public long getFileSize() {
+    public Integer getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(long fileSize) {
+    public void setFileSize(Integer fileSize) {
         this.fileSize = fileSize;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public String getMediaType() {
@@ -65,12 +85,14 @@ public class Picture {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Picture picture = (Picture) o;
-        return id == picture.id && fileSize == picture.fileSize && mediaType.equals(picture.mediaType) && Arrays.equals(data, picture.data) && ads.equals(picture.ads);
+        return Objects.equals(id, picture.id) && Objects.equals(fileSize, picture.fileSize)
+                && Objects.equals(filePath, picture.filePath) && mediaType.equals(picture.mediaType)
+                && Arrays.equals(data, picture.data) && ads.equals(picture.ads);
     }
 
     @Override
     public int hashCode() {
-        int result = Objects.hash(id, fileSize, mediaType, ads);
+        int result = Objects.hash(id, fileSize, filePath, mediaType, ads);
         result = 31 * result + Arrays.hashCode(data);
         return result;
     }
@@ -80,6 +102,7 @@ public class Picture {
         return "Picture{" +
                 "id=" + id +
                 ", fileSize=" + fileSize +
+                ", filePath=" + filePath +
                 ", mediaType='" + mediaType + '\'' +
                 ", data=" + Arrays.toString(data) +
                 ", ads=" + ads +
