@@ -1,9 +1,17 @@
 package ru.skypro.homework.model;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
 import javax.persistence.*;
 import java.util.Arrays;
 import java.util.Objects;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
 @Table(name = "pictures")
 public class Picture {
@@ -22,64 +30,6 @@ public class Picture {
     @JoinColumn(name = "id_ads")
     private Ads ads;
 
-    public Picture() {
-    }
-
-    public Picture(Long id, Integer fileSize, String filePath, String mediaType) {
-        this.id = id;
-        this.fileSize = fileSize;
-        this.filePath = filePath;
-        this.mediaType = mediaType;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public Integer getFileSize() {
-        return fileSize;
-    }
-
-    public void setFileSize(Integer fileSize) {
-        this.fileSize = fileSize;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public void setFilePath(String filePath) {
-        this.filePath = filePath;
-    }
-
-    public String getMediaType() {
-        return mediaType;
-    }
-
-    public void setMediaType(String mediaType) {
-        this.mediaType = mediaType;
-    }
-
-    public byte[] getData() {
-        return data;
-    }
-
-    public void setData(byte[] data) {
-        this.data = data;
-    }
-
-    public Ads getAds() {
-        return ads;
-    }
-
-    public void setAds(Ads ads) {
-        this.ads = ads;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -95,17 +45,5 @@ public class Picture {
         int result = Objects.hash(id, fileSize, filePath, mediaType, ads);
         result = 31 * result + Arrays.hashCode(data);
         return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Picture{" +
-                "id=" + id +
-                ", fileSize=" + fileSize +
-                ", filePath=" + filePath +
-                ", mediaType='" + mediaType + '\'' +
-                ", data=" + Arrays.toString(data) +
-                ", ads=" + ads +
-                '}';
     }
 }
