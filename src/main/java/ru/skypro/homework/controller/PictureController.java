@@ -6,8 +6,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.skypro.homework.dto.PictureDto;
+import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.Picture;
-import ru.skypro.homework.service.PictureService;
+import ru.skypro.homework.service.impl.PictureService;
 
 import java.io.IOException;
 
@@ -30,19 +32,24 @@ public class PictureController {
     /**
      * Загрузка картинки для объявления с указанием идентификационного номера объявления
      */
-    @PostMapping(value = "/photo/{id_ads}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<String> uploadAdsPicture(@PathVariable Long id_ads,
-                                                 @RequestParam MultipartFile adsPicture) throws IOException {
-        pictureService.uploadAdsPicture(id_ads, adsPicture);
-        return ResponseEntity.ok().build();
+    @PostMapping(value = "/photo/{idAds}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PictureDto> uploadAdsPicture(@PathVariable Long idAds,
+                                                       @RequestParam MultipartFile adsPicture) {
+        PictureDto pictureDto;
+        try{
+            pictureDto = pictureService.uploadAdsPicture(idAds, adsPicture);
+        } catch (IOException | NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(pictureDto);
     }
 
     /**
      * Получить картинку по ее id (id)
      */
-    @GetMapping(value = "/photo/{id_picture}")
-    public ResponseEntity<byte[]> downloadPicture(@PathVariable Long id_picture) {
-        Picture picture = pictureService.findPictureById(id_picture);
+    @GetMapping(value = "/photo/{id}")
+    public ResponseEntity<byte[]> downloadPicture(@PathVariable Long id) {
+        Picture picture = pictureService.findPictureById(id);
         if (picture.getMediaType() == null) {
             return ResponseEntity.notFound().build();
         }
@@ -58,14 +65,14 @@ public class PictureController {
      * идентификатор картинки (id_зшсегку), тогда удаляется одна картинка с указанным id
      */
     @DeleteMapping("/delete")
-    public ResponseEntity<Picture> delete(@RequestParam(required = false) Long id_picture,
-                                                    @RequestParam(required = false) boolean all) {
+    public ResponseEntity<Picture> delete(@RequestParam(required = false) Long idPicture,
+                                          @RequestParam(required = false) boolean all) {
         if (all) {
             pictureService.deleteAll();
             return ok().build();
         }
-        if (id_picture != null) {
-            pictureService.deletePicture(id_picture);
+        if (idPicture != null) {
+            pictureService.deletePicture(idPicture);
             return ok().build();
         }
         return ResponseEntity.notFound().build();

@@ -35,14 +35,15 @@ public class UserServiceImpl implements UserService {
 
     public UserDto updateUser(UserDto userDto) throws NotFoundException {
         logger.info("Method updateUser was started");
-        Optional<User> user = Optional.of(userRepository.findById(userDto.getId()).orElseThrow(NotFoundException::new));
+        User user = userRepository.findById(userDto.getId()).orElseThrow(NotFoundException::new);
         userRepository.save(userMapper.userDtoToUser(userDto));
         return userDto;
     }
 
     @Override
-    public Optional<User> getUserById(Long id) {
-        return Optional.of(userRepository.findById(id).get());
+    public Optional<User> getUserById(Long id) throws NotFoundException {
+        return Optional.ofNullable(Optional.of(userRepository.findById(id).get())
+                .orElseThrow(NotFoundException::new));
     }
 
     @Override

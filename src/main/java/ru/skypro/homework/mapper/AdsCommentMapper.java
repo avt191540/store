@@ -1,0 +1,29 @@
+package ru.skypro.homework.mapper;
+
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.factory.Mappers;
+import ru.skypro.homework.dto.AdsCommentDto;
+import ru.skypro.homework.model.AdsComment;
+import ru.skypro.homework.model.User;
+
+import java.util.Collection;
+
+@Mapper(componentModel = "spring")
+public interface AdsCommentMapper {
+    AdsCommentMapper INSTANCE = Mappers.getMapper(AdsCommentMapper.class);
+
+    @Mapping(source = "user.id", target = "idAuthor")
+    @Mapping(source = "adsComment.createdAt", target = "createdAt")
+    @Mapping(source = "adsComment.id", target = "pk")
+    @Mapping(source = "adsComment.text", target = "text")
+    AdsCommentDto entityToDto(AdsComment adsComment, User user);
+
+    @Mapping(source = "adsCommentDto.idAuthor", target = "user.id")
+    @Mapping(source = "adsCommentDto.createdAt", target = "createdAt")
+    @Mapping(source = "adsCommentDto.pk", target = "id")
+    @Mapping(source = "adsCommentDto.text", target = "text")
+    AdsComment adsCommentDtoToEntity(AdsCommentDto adsCommentDto, User user);
+
+    Collection<AdsCommentDto> entitiesToDto(Collection<AdsComment> adsComments);
+}

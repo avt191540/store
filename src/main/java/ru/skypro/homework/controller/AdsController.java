@@ -15,12 +15,11 @@ import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.AdsService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -51,11 +50,11 @@ public class AdsController {
     @GetMapping
     public ResponseEntity<Collection<AdsDto>> getAllAds() {
         logger.info("Method getAllAds is running");
-        Collection<AdsDto> listOfAds = new ArrayList<>();
-        if (!listOfAds.isEmpty()) {
+        Collection<AdsDto> adsDto = adsService.getAllAds();
+        if (adsDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(listOfAds);
+        return ResponseEntity.ok(adsDto);
     }
 
     /**
@@ -64,7 +63,7 @@ public class AdsController {
      * @param createAds объявление
      * @return добавленное объявление в формате json
      */
-    @Operation(
+   @Operation(
             summary = "Добавить объявление",
             description = "Добавление нового объявления",
             responses = {
@@ -75,10 +74,10 @@ public class AdsController {
             }
     )
     @PostMapping
-    public ResponseEntity<AdsDto> addAds(@RequestBody @Valid CreateAdsDto createAds) {
+   public ResponseEntity<AdsDto> addAds(@RequestBody @Valid CreateAdsDto createAds) {
         logger.info("Method addAds is running: {}", createAds);
         return ResponseEntity.ok(adsService.addAds(createAds));
-    }
+   }
 
     /**
      * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
@@ -96,8 +95,10 @@ public class AdsController {
     @GetMapping(value = "/me", params = {"idAuthor"})
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
-        List<AdsDto> listAdsMe = new ArrayList<>();
-        if (!listAdsMe.isEmpty()) {
+        Collection<AdsDto> listAdsMe;
+        try {
+            listAdsMe = adsService.getAdsMe(idAuthor);
+        } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(listAdsMe);
@@ -119,10 +120,12 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/{ad_pk}/comment")
-    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable String ad_pk) {
+    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable Long ad_pk) {
         logger.info("Method getAdsComments is running: {}", ad_pk);
-        Collection<AdsCommentDto> listOfAdsComment = new ArrayList<>();
-        if (!listOfAdsComment.isEmpty()) {
+        Collection<AdsCommentDto> listOfAdsComment;
+        try{
+            listOfAdsComment = adsService.getAdsComments(ad_pk);
+        } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(listOfAdsComment);
@@ -146,8 +149,13 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{ad_pk}/comment/{id}")
-    public ResponseEntity<?> deleteAdsComment(@PathVariable String ad_pk, @PathVariable Long id){
+    public ResponseEntity<?> deleteAdsComment(@PathVariable Long ad_pk, @PathVariable Long id){
         logger.info("Method deleteAdsComment is running: {} {}", ad_pk, id);
+        try {
+            adsService.deleteCommentToAds(ad_pk, id);
+        } catch (NotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok().build();
     }
 
@@ -169,9 +177,14 @@ public class AdsController {
             }
     )
     @GetMapping("/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable String ad_pk, @PathVariable Long id){
+    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable Long ad_pk, @PathVariable Long id){
         logger.info("Method getAdsComment is running: {} {}", ad_pk, id);
-        AdsCommentDto foundAdsComment = new AdsCommentDto();
+        AdsCommentDto foundAdsComment;
+        try {
+            foundAdsComment = adsService.getAdsComment(ad_pk, id);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.ok(foundAdsComment);
     }
 
@@ -194,6 +207,11 @@ public class AdsController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAds(@PathVariable Long id) {
         logger.info("Method removeAds is running: {}", id);
+        try {
+            adsService.removeAds(id);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
@@ -215,7 +233,13 @@ public class AdsController {
     @GetMapping("/{id}")
     public ResponseEntity<FullAdsDto> getAds(@PathVariable Long id) {
         logger.info("Method getAds is running: {}", id);
-        return ResponseEntity.ok().build();
+        FullAdsDto adsDto;
+        try {
+            adsDto = adsService.getAds(id);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adsDto);
     }
 
     /** Редактировать объявление по его идентификатору,
@@ -236,7 +260,13 @@ public class AdsController {
     @PutMapping("/{id}")
     public ResponseEntity<AdsDto> updateAds(@RequestBody AdsDto ads, @PathVariable Long id) {
         logger.info("Method updateAds is running: {} {}", ads, id);
-        return ResponseEntity.ok().build();
+        AdsDto adsUpdatedDto;
+        try {
+            adsUpdatedDto = adsService.updateAds(ads, id);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adsUpdatedDto);
     }
 
     /**
@@ -257,10 +287,16 @@ public class AdsController {
             }
     )
     @PostMapping(value = "/{ad_pk}/comment", params = {"ad_pk", "adsComment"})
-    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable String ad_pk,
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable Long ad_pk,
                                                        @RequestBody AdsCommentDto adsComment){
         logger.info("Method addAdsComment is running: {} {}", ad_pk, adsComment);
-        return ResponseEntity.ok(adsComment);
+        AdsCommentDto newCommentDto;
+        try {
+            newCommentDto = adsService.addAdsComment(ad_pk, adsComment);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(newCommentDto);
     }
 
     /**
@@ -284,9 +320,15 @@ public class AdsController {
     )
     @PostMapping(value = "/{ad_pk}/comment/{id}", params = {"ad_pk", "adsComment", "id"})
     public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody AdsCommentDto adsComment,
-                                                          @PathVariable String ad_pk,
+                                                          @PathVariable Long ad_pk,
                                                           @PathVariable Long id) {
         logger.info("Method createAdsComment is running: {} {} {}", adsComment, ad_pk, id);
-        return ResponseEntity.ok(adsComment);
+        AdsCommentDto commentDto;
+        try {
+            commentDto = adsService.updateAdsComment(adsComment, ad_pk, id);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(commentDto);
     }
 }

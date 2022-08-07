@@ -22,6 +22,7 @@ import ru.skypro.homework.service.UserService;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.Collection;
+import java.util.Optional;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -72,9 +73,13 @@ public class UserController {
     @GetMapping("{/id}")
     public ResponseEntity<User> getUser(@PathVariable @Min(1) Long id){
         logger.info("Method getUser is running: {}", id);
-        User foundUser = userService.getUserById(id).orElseThrow(() -> new
-                ResponseStatusException(HttpStatus.NOT_FOUND, "User not found with id: " + id));
-        return ResponseEntity.ok(foundUser);
+        Optional<User> foundUser;
+        try {
+            foundUser = userService.getUserById(id);
+        } catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(foundUser.get());
     }
 
     /** Редактировать пользователя,
