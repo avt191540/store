@@ -272,7 +272,7 @@ public class AdsController {
     /**
      * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
      * Добавление комментария к объявлению.
-     * @param ad_pk идентификатор объявления
+     * @param adsId идентификатор объявления
      * @param adsComment комментарий
      * @return добавленный комментарий к объявлению в формате json
      */
@@ -286,13 +286,13 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping(value = "/{ad_pk}/comment", params = {"ad_pk", "adsComment"})
-    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable Long ad_pk,
+    @PostMapping("/{adsId}/comment")
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable Long adsId,
                                                        @RequestBody AdsCommentDto adsComment){
-        logger.info("Method addAdsComment is running: {} {}", ad_pk, adsComment);
+        logger.info("Method addAdsComment is running: {} {}", adsId, adsComment);
         AdsCommentDto newCommentDto;
         try {
-            newCommentDto = adsService.addAdsComment(ad_pk, adsComment);
+            newCommentDto = adsService.addAdsComment(adsId, adsComment);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }

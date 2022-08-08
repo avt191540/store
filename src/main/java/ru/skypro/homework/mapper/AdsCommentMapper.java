@@ -4,6 +4,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdsCommentDto;
+import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
 import ru.skypro.homework.model.User;
 
@@ -23,7 +24,8 @@ public interface AdsCommentMapper {
     @Mapping(source = "adsCommentDto.createdAt", target = "createdAt")
     @Mapping(source = "adsCommentDto.pk", target = "id")
     @Mapping(source = "adsCommentDto.text", target = "text")
-    AdsComment adsCommentDtoToEntity(AdsCommentDto adsCommentDto, User user);
+    @Mapping(source = "ads", target = "ads")
+    AdsComment adsCommentDtoToEntity(AdsCommentDto adsCommentDto, User user, Ads ads);
 
     Collection<AdsCommentDto> entitiesToDto(Collection<AdsComment> adsComments);
 }

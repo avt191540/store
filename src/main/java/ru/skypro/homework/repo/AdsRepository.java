@@ -13,7 +13,7 @@ import java.util.Optional;
 public interface AdsRepository extends JpaRepository<Ads, Long> {
     Optional<Collection<Ads>> findAllById(Long id);
 
-    Optional<Collection<Ads>> getAll();
+    //Optional<Collection<Ads>> getAll();
 
     int deleteAdsById(Long id);
 

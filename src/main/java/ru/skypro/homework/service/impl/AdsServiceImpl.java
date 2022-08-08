@@ -57,7 +57,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Collection<AdsDto> getAllAds() throws NotFoundException {
-        Collection<Ads> adsCollection = adsRepository.getAll().orElseThrow(NotFoundException::new);
+        Collection<Ads> adsCollection = adsRepository.findAll();
         return adsMapper.entitiesToDto(adsCollection);
     }
 
@@ -123,7 +123,7 @@ public class AdsServiceImpl implements AdsService {
         Ads foundAds = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
         User author = userRepository.findById(adsComment.getIdAuthor()).orElseThrow(NotFoundException::new);
 
-        AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, author);
+        AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, author, foundAds);
         newComment.setAds(foundAds);
         commentRepository.save(newComment);
 
@@ -133,10 +133,12 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public AdsCommentDto updateAdsComment(AdsCommentDto adsComment, Long ad_pk, Long id) throws NotFoundException {
         User author;
+        Ads ads;
         AdsComment commentUpdate;
         if (commentRepository.existsAdsCommentsByIdAndAds_Id(ad_pk, id)) {
             author = userRepository.findById(adsComment.getIdAuthor()).orElseThrow(NotFoundException::new);
-            commentUpdate = commentMapper.adsCommentDtoToEntity(adsComment, author);
+            ads = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
+            commentUpdate = commentMapper.adsCommentDtoToEntity(adsComment, author, ads);
             commentRepository.save(commentUpdate);
             return commentMapper.entityToDto(commentUpdate, author);
         }
