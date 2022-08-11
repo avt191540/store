@@ -14,18 +14,18 @@ import java.util.Collection;
 public interface AdsCommentMapper {
     AdsCommentMapper INSTANCE = Mappers.getMapper(AdsCommentMapper.class);
 
-    @Mapping(source = "user.id", target = "idAuthor")
+    @Mapping(source = "adsComment.user.id", target = "idAuthor")
     @Mapping(source = "adsComment.createdAt", target = "createdAt")
     @Mapping(source = "adsComment.id", target = "pk")
     @Mapping(source = "adsComment.text", target = "text")
-    AdsCommentDto entityToDto(AdsComment adsComment, User user);
+    AdsCommentDto entityToDto(AdsComment adsComment);
 
     @Mapping(source = "adsCommentDto.idAuthor", target = "user.id")
     @Mapping(source = "adsCommentDto.createdAt", target = "createdAt")
     @Mapping(source = "adsCommentDto.pk", target = "id")
     @Mapping(source = "adsCommentDto.text", target = "text")
     @Mapping(source = "ads", target = "ads")
-    AdsComment adsCommentDtoToEntity(AdsCommentDto adsCommentDto, User user, Ads ads);
+    AdsComment adsCommentDtoToEntity(AdsCommentDto adsCommentDto, Ads ads);
 
     Collection<AdsCommentDto> entitiesToDto(Collection<AdsComment> adsComments);
 }

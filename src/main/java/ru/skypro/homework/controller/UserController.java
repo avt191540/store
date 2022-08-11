@@ -11,18 +11,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.Collection;
-import java.util.Optional;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -70,16 +67,16 @@ public class UserController {
                     )
             }
     )
-    @GetMapping("{/id}")
-    public ResponseEntity<User> getUser(@PathVariable @Min(1) Long id){
+    @GetMapping("/{id}")
+    public ResponseEntity<UserDto> getUser(@PathVariable @Min(1) Long id){
         logger.info("Method getUser is running: {}", id);
-        Optional<User> foundUser;
+        UserDto foundUserDto;
         try {
-            foundUser = userService.getUserById(id);
+            foundUserDto = userService.getUserById(id);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(foundUser.get());
+        return ResponseEntity.ok(foundUserDto);
     }
 
     /** Редактировать пользователя,

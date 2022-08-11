@@ -3,7 +3,6 @@ package ru.skypro.homework.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.controller.UserController;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
@@ -41,9 +40,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Optional<User> getUserById(Long id) throws NotFoundException {
-        return Optional.ofNullable(Optional.of(userRepository.findById(id).get())
-                .orElseThrow(NotFoundException::new));
+    public UserDto getUserById(Long id) throws NotFoundException {
+        User foundUser = userRepository.findById(id).orElseThrow(NotFoundException::new);
+        return userMapper.userToUserDto(foundUser);
     }
 
     @Override

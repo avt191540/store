@@ -1,10 +1,8 @@
 package ru.skypro.homework.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
+import org.hibernate.Hibernate;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -13,7 +11,8 @@ import java.util.Objects;
 @Getter
 @Setter
 @ToString
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "advertisements")
 public class Ads {
@@ -42,13 +41,13 @@ public class Ads {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
         Ads ads = (Ads) o;
-        return getId().equals(ads.getId()) && getTitle().equals(ads.getTitle()) && Objects.equals(getDescription(), ads.getDescription()) && Objects.equals(getPrice(), ads.getPrice()) && getUser().equals(ads.getUser());
+        return id != null && Objects.equals(id, ads.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getTitle(), getDescription(), getPrice(), getUser());
+        return getClass().hashCode();
     }
 }

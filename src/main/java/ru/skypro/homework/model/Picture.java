@@ -1,9 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Arrays;
@@ -11,7 +8,9 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "pictures")
 public class Picture {

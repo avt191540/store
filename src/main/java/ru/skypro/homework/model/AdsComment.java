@@ -8,7 +8,9 @@ import java.util.Objects;
 
 @Getter
 @Setter
-@RequiredArgsConstructor
+@ToString
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "comments")
 public class AdsComment {

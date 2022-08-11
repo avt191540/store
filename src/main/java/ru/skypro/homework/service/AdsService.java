@@ -28,7 +28,7 @@ public interface AdsService {
 
     FullAdsDto getAds(Long id);
 
-    AdsDto updateAds(AdsDto ads, Long id);
+    CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id);
 
     AdsCommentDto addAdsComment(Long ad_pk, AdsCommentDto adsComment);
 
