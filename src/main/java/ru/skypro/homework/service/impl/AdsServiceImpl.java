@@ -12,9 +12,11 @@ import ru.skypro.homework.mapper.AdsCommentMapper;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
+import ru.skypro.homework.model.Picture;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repo.AdsCommentRepository;
 import ru.skypro.homework.repo.AdsRepository;
+import ru.skypro.homework.repo.PictureRepository;
 import ru.skypro.homework.repo.UserRepository;
 import ru.skypro.homework.service.AdsService;
 
@@ -33,15 +35,18 @@ public class AdsServiceImpl implements AdsService {
 
     private final AdsCommentRepository commentRepository;
 
+    private final PictureRepository pictureRepository;
+
     private final AdsMapper adsMapper;
 
     private final AdsCommentMapper commentMapper;
 
     public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, AdsCommentRepository commentRepository,
-                          AdsMapper adsMapper, AdsCommentMapper commentMapper) {
+                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
+        this.pictureRepository = pictureRepository;
         this.adsMapper = adsMapper;
         this.commentMapper = commentMapper;
     }
@@ -50,9 +55,9 @@ public class AdsServiceImpl implements AdsService {
     public AdsDto addAds(CreateAdsDto createAdsDto)  throws NotFoundException {
         logger.info("Method addAds is running");
         User user = userRepository.findById(createAdsDto.getIdAuthor()).orElseThrow(NotFoundException::new);
-        Ads newAds = adsMapper.createAdsDtoToAds(createAdsDto, user);
+        Ads newAds = adsMapper.createAdsDtoToAds(createAdsDto);
         adsRepository.save(newAds);
-        return adsMapper.adsToAdsDto(newAds, user);
+        return adsMapper.adsToAdsDto(newAds);
     }
 
     @Override
@@ -63,15 +68,13 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllById(id)
-                .orElseThrow(NotFoundException::new);
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(id).orElseThrow(NotFoundException::new);
         return adsMapper.entitiesToDto(adsMe);
     }
 
     @Override
     public Collection<AdsCommentDto> getAdsComments(Long id) throws NotFoundException {
-        Collection<AdsComment> adsComments = commentRepository
-                .getAllCommentsByAdsId(id).orElseThrow(NotFoundException::new);
+        Collection<AdsComment> adsComments = commentRepository.getAllCommentsByAdsId(id).orElseThrow(NotFoundException::new);
         return commentMapper.entitiesToDto(adsComments);
     }
 
@@ -88,10 +91,7 @@ public class AdsServiceImpl implements AdsService {
         AdsComment foundComment = commentRepository
                 .getCommentToAdsById(ad_pk, id).orElseThrow(NotFoundException::new);
 
-        User authorAds = commentRepository
-                .getUserByCommentId(id).orElseThrow(NotFoundException::new);
-
-        return commentMapper.entityToDto(foundComment, authorAds);
+        return commentMapper.entityToDto(foundComment);
     }
 
     @Override
@@ -104,16 +104,19 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAdsDto getAds(Long id) throws NotFoundException {
         Ads ads = adsRepository.findById(id).orElseThrow(NotFoundException::new);
-        User user = adsRepository.getUserByAdsId(id).orElseThrow(NotFoundException::new);
-        return adsMapper.adsToFullAdsDto(ads, user);
+        logger.info("User owner advertisement: {} {}", id, ads.getUser());
+        return adsMapper.adsToFullAdsDto(ads, ads.getUser());
     }
 
     @Override
-    public AdsDto updateAds(AdsDto ads, Long id) throws NotFoundException {
-        User user = adsRepository.getUserByAdsId(id).orElseThrow(NotFoundException::new);
+    public CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id) throws NotFoundException {
         if(adsRepository.existsById(id)){
-            adsRepository.save(adsMapper.adsDtoToAds(ads, user));
-            return ads;
+            Ads updateAds = adsMapper.createAdsDtoToAds(createAdsDto);
+            Collection<Picture> pictures = pictureRepository.findAllByAds_Id(id);
+            updateAds.setId(id);
+            updateAds.setPictures(pictures);
+            adsRepository.save(updateAds);
+            return createAdsDto;
         }
         throw new NotFoundException();
     }
@@ -121,26 +124,26 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public AdsCommentDto addAdsComment(Long ad_pk, AdsCommentDto adsComment) throws NotFoundException {
         Ads foundAds = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
-        User author = userRepository.findById(adsComment.getIdAuthor()).orElseThrow(NotFoundException::new);
 
-        AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, author, foundAds);
+        logger.info("User owner advertisement: {}", foundAds.getUser());
+
+        AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, foundAds);
         newComment.setAds(foundAds);
         commentRepository.save(newComment);
 
-        return commentMapper.entityToDto(newComment, author);
+        return commentMapper.entityToDto(newComment);
     }
 
     @Override
-    public AdsCommentDto updateAdsComment(AdsCommentDto adsComment, Long ad_pk, Long id) throws NotFoundException {
-        User author;
+    public AdsCommentDto updateAdsComment(AdsCommentDto adsCommentDto, Long ad_pk, Long id) throws NotFoundException {
         Ads ads;
         AdsComment commentUpdate;
-        if (commentRepository.existsAdsCommentsByIdAndAds_Id(ad_pk, id)) {
-            author = userRepository.findById(adsComment.getIdAuthor()).orElseThrow(NotFoundException::new);
+        logger.info("Result from commentsRepository: {}", commentRepository.existsAdsCommentById(id));
+        if (commentRepository.existsAdsCommentById(id)) {
             ads = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
-            commentUpdate = commentMapper.adsCommentDtoToEntity(adsComment, author, ads);
+            commentUpdate = commentMapper.adsCommentDtoToEntity(adsCommentDto, ads);
             commentRepository.save(commentUpdate);
-            return commentMapper.entityToDto(commentUpdate, author);
+            return commentMapper.entityToDto(commentUpdate);
         }
         throw new NotFoundException();
     }

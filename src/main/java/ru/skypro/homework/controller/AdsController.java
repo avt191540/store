@@ -19,6 +19,7 @@ import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.AdsService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.Collection;
 
 @Slf4j
@@ -93,7 +94,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/me", params = {"idAuthor"})
-    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") Long idAuthor){
+    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
         Collection<AdsDto> listAdsMe;
         try {
@@ -120,7 +121,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/{ad_pk}/comment")
-    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable Long ad_pk) {
+    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable @Min(1) Long ad_pk) {
         logger.info("Method getAdsComments is running: {}", ad_pk);
         Collection<AdsCommentDto> listOfAdsComment;
         try{
@@ -149,7 +150,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{ad_pk}/comment/{id}")
-    public ResponseEntity<?> deleteAdsComment(@PathVariable Long ad_pk, @PathVariable Long id){
+    public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
         logger.info("Method deleteAdsComment is running: {} {}", ad_pk, id);
         try {
             adsService.deleteCommentToAds(ad_pk, id);
@@ -177,7 +178,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{ad_pk}/comment/{id}")
-    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable Long ad_pk, @PathVariable Long id){
+    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
         logger.info("Method getAdsComment is running: {} {}", ad_pk, id);
         AdsCommentDto foundAdsComment;
         try {
@@ -205,7 +206,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> removeAds(@PathVariable Long id) {
+    public ResponseEntity<?> removeAds(@PathVariable @Min(1) Long id) {
         logger.info("Method removeAds is running: {}", id);
         try {
             adsService.removeAds(id);
@@ -231,7 +232,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<FullAdsDto> getAds(@PathVariable Long id) {
+    public ResponseEntity<FullAdsDto> getAds(@PathVariable @Min(1) Long id) {
         logger.info("Method getAds is running: {}", id);
         FullAdsDto adsDto;
         try {
@@ -245,7 +246,7 @@ public class AdsController {
     /** Редактировать объявление по его идентификатору,
      * PUT <a href="http://localhost:3000/ads/">...</a>{id}
      * @param id идентификатор
-     * @param ads объявление
+     * @param createAdsDto объявление
      **/
     @Operation(
             summary = "Редактировать объявление",
@@ -258,11 +259,11 @@ public class AdsController {
             }
     )
     @PutMapping("/{id}")
-    public ResponseEntity<AdsDto> updateAds(@RequestBody AdsDto ads, @PathVariable Long id) {
-        logger.info("Method updateAds is running: {} {}", ads, id);
-        AdsDto adsUpdatedDto;
+    public ResponseEntity<CreateAdsDto> updateAds(@RequestBody @Valid CreateAdsDto createAdsDto, @PathVariable @Min(1) Long id) {
+        logger.info("Method updateAds is running: {} {}", createAdsDto, id);
+        CreateAdsDto adsUpdatedDto;
         try {
-            adsUpdatedDto = adsService.updateAds(ads, id);
+            adsUpdatedDto = adsService.updateAds(createAdsDto, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -287,8 +288,8 @@ public class AdsController {
             }
     )
     @PostMapping("/{adsId}/comment")
-    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable Long adsId,
-                                                       @RequestBody AdsCommentDto adsComment){
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable @Min(1) Long adsId,
+                                                       @Valid @RequestBody AdsCommentDto adsComment){
         logger.info("Method addAdsComment is running: {} {}", adsId, adsComment);
         AdsCommentDto newCommentDto;
         try {
@@ -318,10 +319,10 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping(value = "/{ad_pk}/comment/{id}", params = {"ad_pk", "adsComment", "id"})
-    public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody AdsCommentDto adsComment,
-                                                          @PathVariable Long ad_pk,
-                                                          @PathVariable Long id) {
+    @PostMapping("/{ad_pk}/comment/{id}")
+    public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody @Valid AdsCommentDto adsComment,
+                                                          @PathVariable @Min(1) Long ad_pk,
+                                                          @PathVariable @Min(1) Long id) {
         logger.info("Method createAdsComment is running: {} {} {}", adsComment, ad_pk, id);
         AdsCommentDto commentDto;
         try {

@@ -33,15 +33,15 @@ public class PictureService {
 
     public PictureDto uploadAdsPicture(Long idAds, MultipartFile pictureFile) throws IOException, NotFoundException {
         logger.info("Method was called - uploadPetPhoto");
-        Optional<Ads> ads = Optional.ofNullable(adsRepository.findById(idAds).orElseThrow(NotFoundException::new));
+        Ads ads = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
 
         Picture picture = new Picture();
-        picture.setAds(ads.get());
+        picture.setAds(ads);
         picture.setFileSize((int) pictureFile.getSize());
         picture.setMediaType(pictureFile.getContentType());
         picture.setData(pictureFile.getBytes());
         pictureRepository.save(picture);
-        return pictureMapper.pictureToPictureDto(picture, ads.get());
+        return pictureMapper.pictureToPictureDto(picture, ads);
     }
 
     public Picture findPictureById(Long idPicture) throws NotFoundException {
