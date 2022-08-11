@@ -9,7 +9,10 @@ import java.util.Optional;
 
 @Repository
 public interface AdsRepository extends JpaRepository<Ads, Long> {
-    Optional<Collection<Ads>> findAllByUserId(Long id);
+
+    Optional<Collection<Ads>> findAllByUserIdAndTitleContainsIgnoreCase(Long id, String word);
+
+    Optional<Collection<Ads>> findAllByTitleContainsIgnoreCase(String word);
 
     int deleteAdsById(Long id);
 }

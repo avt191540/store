@@ -1,7 +1,5 @@
 package ru.skypro.homework.service;
 
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.dto.AdsDto;
 import ru.skypro.homework.dto.CreateAdsDto;
@@ -14,9 +12,9 @@ public interface AdsService {
 
     AdsDto addAds(CreateAdsDto createAdsDto);
 
-    Collection<AdsDto> getAllAds();
+    Collection<AdsDto> getAllAds(String word);
 
-    Collection<AdsDto> getAdsMe(Long id);
+    Collection<AdsDto> getAdsMe(Long id, String word);
 
     Collection<AdsCommentDto> getAdsComments(Long ad_pk);
 

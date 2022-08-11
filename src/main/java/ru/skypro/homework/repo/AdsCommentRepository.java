@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface AdsCommentRepository extends JpaRepository<AdsComment, Long> {
 
-    @Query(value = "select * from comments where id_ads = :id", nativeQuery = true)
-    Optional<Collection<AdsComment>> getAllCommentsByAdsId(Long id);
+    //@Query(value = "select * from comments where id_ads = :id", nativeQuery = true)
+    Optional<Collection<AdsComment>> findAdsCommentsByAds_IdOrderByCreatedAtDesc(Long id);
 
     @Modifying
     @Query(value = "delete from comments where id_ads = :ad_pk and id_comment = :id", nativeQuery = true)
