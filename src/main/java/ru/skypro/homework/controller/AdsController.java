@@ -81,7 +81,11 @@ public class AdsController {
    }
 
     /**
-     * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
+     * Получить все объявления автора, которые содержат определенный набор символово (строку) GET <a href="http://localhost:3000/ads">...</a>
+     * Получить объявления автора содержащие определенную строку.
+     * @param idAuthor идентификатор автора
+     * @param word строка содержащаяся в объявлении
+     * @return возвращаемая коллекция объявлений
      **/
     @Operation(
             summary = "Получить все объявления автора",
@@ -106,6 +110,22 @@ public class AdsController {
         return ResponseEntity.ok(listAdsMe);
     }
 
+    /**
+     * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
+     * Получить объявления автора содержащие определенную строку.
+     * @param idAuthor идентификатор автора
+     * @return возвращаемая коллекция объявлений
+     **/
+    @Operation(
+            summary = "Получить все объявления автора",
+            description = "Получение всех объявлений автора",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
     @GetMapping(value = "/me", params = {"idAuthor"})
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
                                                        @Min(1) Long idAuthor){
