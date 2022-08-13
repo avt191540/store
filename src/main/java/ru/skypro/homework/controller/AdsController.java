@@ -48,7 +48,7 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(/*value = "/all", params = {"word"}*/)
+    @GetMapping()
     public ResponseEntity<Collection<AdsDto>> getAllAds(@RequestParam String word) {
         logger.info("Method getAllAds is running");
         Collection<AdsDto> adsDto = adsService.getAllAds(word);
@@ -100,6 +100,19 @@ public class AdsController {
         Collection<AdsDto> listAdsMe;
         try {
             listAdsMe = adsService.getAdsMe(idAuthor, word);
+        } catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(listAdsMe);
+    }
+
+    @GetMapping(value = "/me", params = {"idAuthor"})
+    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
+                                                       @Min(1) Long idAuthor){
+        logger.info("Method getAdsMe is running: {}", idAuthor);
+        Collection<AdsDto> listAdsMe;
+        try {
+            listAdsMe = adsService.getAdsMe(idAuthor);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
