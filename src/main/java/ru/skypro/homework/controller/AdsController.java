@@ -36,6 +36,30 @@ public class AdsController {
     private final AdsService adsService;
 
     /**
+     * Получить все существующие объявления содержащие искомую строку GET <a href="http://localhost:3000/ads">...</a>
+     * @param inputString строка содержащаяся в названии объявления
+     **/
+    @Operation(
+            summary = "Получить все объявления содержащие строку",
+            description = "Получение всех объявлений содержащих строку",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
+    @GetMapping(params = {"inputString"})
+    public ResponseEntity<Collection<AdsDto>> getAllAds(@RequestParam String inputString) {
+        logger.info("Method getAllAds is running");
+        Collection<AdsDto> adsDto = adsService.getAllAds(inputString);
+        if (adsDto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adsDto);
+    }
+
+    /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
      **/
     @Operation(
@@ -49,9 +73,9 @@ public class AdsController {
             }
     )
     @GetMapping()
-    public ResponseEntity<Collection<AdsDto>> getAllAds(@RequestParam String word) {
+    public ResponseEntity<Collection<AdsDto>> getAllAds() {
         logger.info("Method getAllAds is running");
-        Collection<AdsDto> adsDto = adsService.getAllAds(word);
+        Collection<AdsDto> adsDto = adsService.getAllAds();
         if (adsDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -84,7 +108,7 @@ public class AdsController {
      * Получить все объявления автора, которые содержат определенный набор символово (строку) GET <a href="http://localhost:3000/ads">...</a>
      * Получить объявления автора содержащие определенную строку.
      * @param idAuthor идентификатор автора
-     * @param word строка содержащаяся в объявлении
+     * @param inputString строка содержащаяся в объявлении
      * @return возвращаемая коллекция объявлений
      **/
     @Operation(
@@ -97,13 +121,13 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(value = "/me", params = {"idAuthor", "word"})
+    @GetMapping(value = "/me", params = {"idAuthor", "inputString"})
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
-                                                           @Min(1) Long idAuthor, String word){
+                                                           @Min(1) Long idAuthor, String inputString){
         logger.info("Method getAdsMe is running: {}", idAuthor);
         Collection<AdsDto> listAdsMe;
         try {
-            listAdsMe = adsService.getAdsMe(idAuthor, word);
+            listAdsMe = adsService.getAdsMe(idAuthor, inputString);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
