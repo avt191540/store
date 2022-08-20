@@ -116,14 +116,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id) throws NotFoundException {
+    public AdsDto updateAds(AdsDto adsDto, Long id) throws NotFoundException {
         if(adsRepository.existsById(id)){
-            Ads updateAds = adsMapper.createAdsDtoToAds(createAdsDto);
+            Ads updateAds = adsMapper.adsDtoToAds(adsDto);
             Collection<Picture> pictures = pictureRepository.findAllByAds_Id(id);
             updateAds.setId(id);
             updateAds.setPictures(pictures);
             adsRepository.save(updateAds);
-            return createAdsDto;
+            return adsDto;
         }
         throw new NotFoundException();
     }

@@ -293,11 +293,11 @@ public class AdsController {
             }
     )
     @PutMapping("/{id}")
-    public ResponseEntity<CreateAdsDto> updateAds(@RequestBody @Valid CreateAdsDto createAdsDto, @PathVariable @Min(1) Long id) {
-        logger.info("Method updateAds is running: {} {}", createAdsDto, id);
-        CreateAdsDto adsUpdatedDto;
+    public ResponseEntity<AdsDto> updateAds(@RequestBody @Valid AdsDto adsDto, @PathVariable @Min(1) Long id) {
+        logger.info("Method updateAds is running: {} {}", adsDto, id);
+        AdsDto adsUpdatedDto;
         try {
-            adsUpdatedDto = adsService.updateAds(createAdsDto, id);
+            adsUpdatedDto = adsService.updateAds(adsDto, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
