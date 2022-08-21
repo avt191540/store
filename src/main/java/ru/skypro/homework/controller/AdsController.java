@@ -74,6 +74,7 @@ public class AdsController {
     )
     @GetMapping()
     public ResponseEntity<Collection<AdsDto>> getAllAds() {
+
         logger.info("Method getAllAds is running");
         Collection<AdsDto> adsDto = adsService.getAllAds();
         if (adsDto.isEmpty()) {
@@ -135,6 +136,7 @@ public class AdsController {
     /**
      * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
      * @param idAuthor идентификатор автора объявления
+
      **/
     @Operation(
             summary = "Получить все объявления автора",
@@ -148,6 +150,35 @@ public class AdsController {
     )
     @GetMapping(value = "/me", params = {"idAuthor"})
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor){
+        logger.info("Method getAdsMe is running: {}", idAuthor);
+        Collection<AdsDto> listAdsMe;
+        try {
+            listAdsMe = adsService.getAdsMe(idAuthor);
+        } catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(listAdsMe);
+    }
+
+    /**
+     * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
+     * Получить объявления автора содержащие определенную строку.
+     * @param idAuthor идентификатор автора
+     * @return возвращаемая коллекция объявлений
+     **/
+    @Operation(
+            summary = "Получить все объявления автора",
+            description = "Получение всех объявлений автора",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
+    @GetMapping(value = "/me", params = {"idAuthor"})
+    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
+                                                       @Min(1) Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
         Collection<AdsDto> listAdsMe;
         try {

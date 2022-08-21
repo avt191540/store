@@ -16,6 +16,7 @@ public interface AdsService {
     Collection<AdsDto> getAllAds();
 
     Collection<AdsDto> getAdsMe(Long id, String word);
+    Collection<AdsDto> getAdsMe(Long id);
 
     Collection<AdsDto> getAdsMe(Long id);
 

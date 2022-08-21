@@ -85,6 +85,12 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
+    public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(id).orElseThrow(NotFoundException::new);
+        return adsMapper.entitiesToDto(adsMe);
+    }
+
+    @Override
     public Collection<AdsCommentDto> getAdsComments(Long id) throws NotFoundException {
         Collection<AdsComment> adsComments = commentRepository.findAdsCommentsByAds_IdOrderByCreatedAtDesc(id)
                 .orElseThrow(NotFoundException::new);
