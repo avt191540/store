@@ -126,7 +126,7 @@ public class AdsController {
         logger.info("Method getAdsMe is running: {} {}", idAuthor, input);
         Collection<AdsDto> listAdsMe;
         try {
-            listAdsMe = adsService.getAdsMe(idAuthor, input);
+            listAdsMe = adsService.getAdsMeByTitle(idAuthor, input);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
