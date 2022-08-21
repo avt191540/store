@@ -62,6 +62,7 @@ public class AdsController {
     /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
      **/
+
     @Operation(
             summary = "Получить все объявления",
             description = "Получение всех объявлений",
@@ -74,14 +75,13 @@ public class AdsController {
     )
     @GetMapping()
     public ResponseEntity<Collection<AdsDto>> getAllAds() {
-
         logger.info("Method getAllAds is running");
         Collection<AdsDto> adsDto = adsService.getAllAds();
         if (adsDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(adsDto);
-    }
+    }*/
 
     /**
      * POST <a href="http://localhost:3000/ads">...</a>

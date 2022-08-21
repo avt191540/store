@@ -41,14 +41,17 @@ public class AdsServiceImpl implements AdsService {
 
     private final AdsCommentMapper commentMapper;
 
+    private final AuthServiceImpl authService;
+
     public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, AdsCommentRepository commentRepository,
-                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper) {
+                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper, AuthServiceImpl authService) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.pictureRepository = pictureRepository;
         this.adsMapper = adsMapper;
         this.commentMapper = commentMapper;
+        this.authService = authService;
     }
 
     @Override
@@ -79,8 +82,16 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
+    public Collection<AdsDto> getAllAds() {
+        Collection<Ads> adsCollection = adsRepository.findAll();
+        return adsMapper.entitiesToDto(adsCollection);
+    }
+
+    @Override
     public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllByUserId(id).orElseThrow(NotFoundException::new);
+        Long currentId = authService.getIdCurrentUser();
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(currentId).orElseThrow(NotFoundException::new);
+
         return adsMapper.entitiesToDto(adsMe);
     }
 
