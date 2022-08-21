@@ -12,7 +12,6 @@ import ru.skypro.homework.repo.UserRepository;
 import ru.skypro.homework.service.UserService;
 
 import java.util.Collection;
-import java.util.Optional;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,11 +31,15 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(user);
     }
 
-    public UserDto updateUser(UserDto userDto) throws NotFoundException {
+    public UserDto updateUser(String userName,UserDto userDto) throws NotFoundException {
         logger.info("Method updateUser was started");
-        User user = userRepository.findById(userDto.getId()).orElseThrow(NotFoundException::new);
-        userRepository.save(userMapper.userDtoToUser(userDto));
-        return userDto;
+        User user = userRepository.findUserByUserName(userName);
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setPhone(userDto.getPhone());
+        userRepository.save(user);
+        logger.info("Mapping from User to UserDto: {}",userMapper.userToUserDto(user));
+        return userMapper.userToUserDto(user);
     }
 
     @Override
