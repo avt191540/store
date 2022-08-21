@@ -11,12 +11,11 @@ public interface AdsService {
 
     AdsDto addAds(CreateAdsDto createAdsDto);
 
-    Collection<AdsDto> getAllAdsByTitle(String word);
+    Collection<AdsDto> getAllAdsByTitle(String input);
 
     Collection<AdsDto> getAllAds();
 
-    Collection<AdsDto> getAdsMe(Long id, String word);
-    Collection<AdsDto> getAdsMe(Long id);
+    Collection<AdsDto> getAdsMeByTitle(Long id, String input);
 
     Collection<AdsDto> getAdsMe(Long id);
 
