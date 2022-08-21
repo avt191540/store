@@ -21,7 +21,6 @@ public class UserDto {
     @Size(min = 10, message = "Phone should be at least 10 chars")
     private String phone;
 
-    @NotBlank
     @Email
     private String email;
 }

@@ -6,15 +6,18 @@ import ru.skypro.homework.dto.CreateAdsDto;
 import ru.skypro.homework.dto.FullAdsDto;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface AdsService {
 
     AdsDto addAds(CreateAdsDto createAdsDto);
 
-    Collection<AdsDto> getAllAds(String word);
+    Collection<AdsDto> getAllAdsByTitle(String word);
+
+    Collection<AdsDto> getAllAds();
 
     Collection<AdsDto> getAdsMe(Long id, String word);
+
+    Collection<AdsDto> getAdsMe(Long id);
 
     Collection<AdsCommentDto> getAdsComments(Long ad_pk);
 
@@ -26,7 +29,7 @@ public interface AdsService {
 
     FullAdsDto getAds(Long id);
 
-    CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id);
+    AdsDto updateAds(AdsDto adsDto, Long id);
 
     AdsCommentDto addAdsComment(Long ad_pk, AdsCommentDto adsComment);
 
