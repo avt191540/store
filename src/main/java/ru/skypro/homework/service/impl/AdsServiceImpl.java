@@ -61,14 +61,26 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAllAds(String word) throws NotFoundException {
-        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(word).get();
+    public Collection<AdsDto> getAllAdsByTitle(String input) throws NotFoundException {
+        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(input).get();
         return adsMapper.entitiesToDto(adsCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAdsMe(Long id, String word) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, word).orElseThrow(NotFoundException::new);
+    public Collection<AdsDto> getAllAds() {
+        Collection<Ads> adsCollection = adsRepository.findAll();
+        return adsMapper.entitiesToDto(adsCollection);
+    }
+
+    @Override
+    public Collection<AdsDto> getAdsMe(Long id, String input) throws NotFoundException {
+        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input).orElseThrow(NotFoundException::new);
+        return adsMapper.entitiesToDto(adsMe);
+    }
+
+    @Override
+    public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(id).orElseThrow(NotFoundException::new);
         return adsMapper.entitiesToDto(adsMe);
     }
 
@@ -116,14 +128,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id) throws NotFoundException {
+    public AdsDto updateAds(AdsDto adsDto, Long id) throws NotFoundException {
         if(adsRepository.existsById(id)){
-            Ads updateAds = adsMapper.createAdsDtoToAds(createAdsDto);
+            Ads updateAds = adsMapper.adsDtoToAds(adsDto);
             Collection<Picture> pictures = pictureRepository.findAllByAds_Id(id);
             updateAds.setId(id);
             updateAds.setPictures(pictures);
             adsRepository.save(updateAds);
-            return createAdsDto;
+            return adsDto;
         }
         throw new NotFoundException();
     }

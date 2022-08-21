@@ -36,6 +36,30 @@ public class AdsController {
     private final AdsService adsService;
 
     /**
+     * Получить все существующие объявления по строке содержащейся в заголовке GET <a href="http://localhost:3000/ads">...</a>
+     * @param input строка для поиска объявлений по названию
+     **/
+    @Operation(
+            summary = "Получить все объявления по названию",
+            description = "Получение всех объявлений по названию",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
+    @GetMapping(params = {"input"})
+    public ResponseEntity<Collection<AdsDto>> getAllAdsByTitle(@RequestParam String input) {
+        logger.info("Method getAllAds is running");
+        Collection<AdsDto> adsDto = adsService.getAllAdsByTitle(input);
+        if (adsDto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adsDto);
+    }
+
+    /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
      **/
     @Operation(
@@ -49,9 +73,10 @@ public class AdsController {
             }
     )
     @GetMapping()
-    public ResponseEntity<Collection<AdsDto>> getAllAds(@RequestParam String word) {
+    public ResponseEntity<Collection<AdsDto>> getAllAds() {
+
         logger.info("Method getAllAds is running");
-        Collection<AdsDto> adsDto = adsService.getAllAds(word);
+        Collection<AdsDto> adsDto = adsService.getAllAds();
         if (adsDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -81,11 +106,37 @@ public class AdsController {
    }
 
     /**
-     * Получить все объявления автора, которые содержат определенный набор символово (строку) GET <a href="http://localhost:3000/ads">...</a>
-     * Получить объявления автора содержащие определенную строку.
-     * @param idAuthor идентификатор автора
-     * @param word строка содержащаяся в объявлении
-     * @return возвращаемая коллекция объявлений
+     * Получить все объявления автора по заголовку GET <a href="http://localhost:3000/ads">...</a>
+     * @param input строка содержащаяся в заголовке объявления
+     * @param idAuthor идентификатор автора объявления
+     **/
+    @Operation(
+            summary = "Получить все объявления автора по заголовку",
+            description = "Получение всех объявлений автора по заголовку",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
+    @GetMapping(value = "/me", params = {"idAuthor", "input"})
+    public ResponseEntity<Collection<AdsDto>> getAdsMeByTitle(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor,
+                                                       String input){
+        logger.info("Method getAdsMe is running: {} {}", idAuthor, input);
+        Collection<AdsDto> listAdsMe;
+        try {
+            listAdsMe = adsService.getAdsMe(idAuthor, input);
+        } catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(listAdsMe);
+    }
+
+    /**
+     * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
+     * @param idAuthor идентификатор автора объявления
+
      **/
     @Operation(
             summary = "Получить все объявления автора",
@@ -97,13 +148,12 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(value = "/me", params = {"idAuthor", "word"})
-    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
-                                                           @Min(1) Long idAuthor, String word){
+    @GetMapping(value = "/me", params = {"idAuthor"})
+    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
         Collection<AdsDto> listAdsMe;
         try {
-            listAdsMe = adsService.getAdsMe(idAuthor, word);
+            listAdsMe = adsService.getAdsMe(idAuthor);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -279,8 +329,8 @@ public class AdsController {
 
     /** Редактировать объявление по его идентификатору,
      * PUT <a href="http://localhost:3000/ads/">...</a>{id}
-     * @param id идентификатор
-     * @param createAdsDto объявление
+     * @param id идентификатор объявления
+     * @param adsDto объявление
      **/
     @Operation(
             summary = "Редактировать объявление",
@@ -293,11 +343,11 @@ public class AdsController {
             }
     )
     @PutMapping("/{id}")
-    public ResponseEntity<CreateAdsDto> updateAds(@RequestBody @Valid CreateAdsDto createAdsDto, @PathVariable @Min(1) Long id) {
-        logger.info("Method updateAds is running: {} {}", createAdsDto, id);
-        CreateAdsDto adsUpdatedDto;
+    public ResponseEntity<AdsDto> updateAds(@RequestBody @Valid AdsDto adsDto, @PathVariable @Min(1) Long id) {
+        logger.info("Method updateAds is running: {} {}", adsDto, id);
+        AdsDto adsUpdatedDto;
         try {
-            adsUpdatedDto = adsService.updateAds(createAdsDto, id);
+            adsUpdatedDto = adsService.updateAds(adsDto, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }

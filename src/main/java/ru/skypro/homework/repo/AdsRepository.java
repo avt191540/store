@@ -15,5 +15,7 @@ public interface AdsRepository extends JpaRepository<Ads, Long> {
 
     Optional<Collection<Ads>> findAllByTitleContainsIgnoreCase(String word);
 
+    Optional<Collection<Ads>> findAllByUserId(Long id);
+
     int deleteAdsById(Long id);
 }
