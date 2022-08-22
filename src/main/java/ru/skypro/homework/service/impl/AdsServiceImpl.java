@@ -41,14 +41,17 @@ public class AdsServiceImpl implements AdsService {
 
     private final AdsCommentMapper commentMapper;
 
+    private final AuthServiceImpl authService;
+
     public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, AdsCommentRepository commentRepository,
-                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper) {
+                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper, AuthServiceImpl authService) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.pictureRepository = pictureRepository;
         this.adsMapper = adsMapper;
         this.commentMapper = commentMapper;
+        this.authService = authService;
     }
 
     @Override
@@ -61,26 +64,34 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAllAds(String word) {
-        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(word).get();
+    public Collection<AdsDto> getAllAdsByTitle(String input) throws NotFoundException {
+        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(input).get();
         return adsMapper.entitiesToDto(adsCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAllAds(){
+    public Collection<AdsDto> getAllAds() {
         Collection<Ads> adsCollection = adsRepository.findAll();
         return adsMapper.entitiesToDto(adsCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAdsMe(Long id, String word) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, word).orElseThrow(NotFoundException::new);
+    public Collection<AdsDto> getAdsMeByTitle(Long id, String input) throws NotFoundException {
+        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input).orElseThrow(NotFoundException::new);
         return adsMapper.entitiesToDto(adsMe);
     }
 
     @Override
+    public Collection<AdsDto> getAllAds() {
+        Collection<Ads> adsCollection = adsRepository.findAll();
+        return adsMapper.entitiesToDto(adsCollection);
+    }
+
+    @Override
     public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllByUserId(id).orElseThrow(NotFoundException::new);
+        Long currentId = authService.getIdCurrentUser();
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(currentId).orElseThrow(NotFoundException::new);
+
         return adsMapper.entitiesToDto(adsMe);
     }
 
@@ -122,14 +133,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public CreateAdsDto updateAds(CreateAdsDto createAdsDto, Long id) throws NotFoundException {
+    public AdsDto updateAds(AdsDto adsDto, Long id) throws NotFoundException {
         if(adsRepository.existsById(id)){
-            Ads updateAds = adsMapper.createAdsDtoToAds(createAdsDto);
+            Ads updateAds = adsMapper.adsDtoToAds(adsDto);
             Collection<Picture> pictures = pictureRepository.findAllByAds_Id(id);
             updateAds.setId(id);
             updateAds.setPictures(pictures);
             adsRepository.save(updateAds);
-            return createAdsDto;
+            return adsDto;
         }
         throw new NotFoundException();
     }

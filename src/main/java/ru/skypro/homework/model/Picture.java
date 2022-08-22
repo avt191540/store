@@ -1,8 +1,11 @@
 package ru.skypro.homework.model;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.*;
 
 import javax.persistence.*;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -28,6 +31,7 @@ public class Picture {
     @ManyToOne
     @JoinColumn(name = "id_ads")
     private Ads ads;
+
 
     @Override
     public boolean equals(Object o) {

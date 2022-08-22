@@ -13,4 +13,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query(value = "select * from users order by first_name, last_name", nativeQuery = true)
     Optional<Collection<User>> getAll();
+
+    User findUserByUserName(String userName);
+
+    User getUserByUserName (String userName);
+
+    Long getIdByUserName (String userName);
+
+    boolean existsUserByUserName (String userName);
+
 }
