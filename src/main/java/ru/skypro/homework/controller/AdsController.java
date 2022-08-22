@@ -42,6 +42,7 @@ public class AdsController {
     @Operation(
             summary = "Получить все объявления по названию",
             description = "Получение всех объявлений по названию",
+
             responses = {
                     @ApiResponse(
                             responseCode = "200",
