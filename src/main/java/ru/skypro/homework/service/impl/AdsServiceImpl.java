@@ -70,12 +70,6 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAllAds() {
-        Collection<Ads> adsCollection = adsRepository.findAll();
-        return adsMapper.entitiesToDto(adsCollection);
-    }
-
-    @Override
     public Collection<AdsDto> getAdsMeByTitle(Long id, String input) throws NotFoundException {
         Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input).orElseThrow(NotFoundException::new);
         return adsMapper.entitiesToDto(adsMe);
