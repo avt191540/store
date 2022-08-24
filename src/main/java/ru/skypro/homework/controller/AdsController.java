@@ -82,7 +82,7 @@ public class AdsController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(adsDto);
-    }*/
+    }
 
     /**
      * POST <a href="http://localhost:3000/ads">...</a>
