@@ -6,14 +6,17 @@ import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.model.User;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface UserService {
     UserDto addUser(CreateUserDto createUser);
 
-    UserDto updateUser(UserDto userDto)throws NotFoundException;
+    UserDto updateUser(String userName,UserDto userDto) throws NotFoundException;
 
     UserDto getUserById(Long id);
+
+    void savePassword(String userName, String password);
+
+    void updateUserRegistration(User user);
 
     Collection<UserDto> getAllUsers();
 }

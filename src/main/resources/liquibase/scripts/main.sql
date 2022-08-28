@@ -3,14 +3,13 @@
 -- changeSet yuvis:1
 CREATE TABLE users (
     id SERIAL NOT NULL PRIMARY KEY,
-    user_name VARCHAR(50) NOT NULL,
+    username VARCHAR(50) NOT NULL,
     first_name VARCHAR(200),
     last_name VARCHAR(200),
     phone VARCHAR(30),
     email VARCHAR(200),
     password VARCHAR(200) NOT NULL,
-    role VARCHAR(20) DEFAULT NULL
-                   CONSTRAINT role_check CHECK ( role IN ('USER', 'ADMIN'))
+    enabled boolean
 );
 
 -- changeSet yuvis:2
@@ -36,3 +35,11 @@ CREATE TABLE pictures (
     media_type VARCHAR(255),
     data bytea
 );
+
+-- changeSet yuvis:5
+CREATE TABLE authorities(
+    id SERIAL NOT NULL PRIMARY KEY,
+    username VARCHAR(50),
+    authority VARCHAR(20)
+);
+

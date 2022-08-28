@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.AdsCommentDto;
@@ -74,7 +75,6 @@ public class AdsController {
     )
     @GetMapping()
     public ResponseEntity<Collection<AdsDto>> getAllAds() {
-
         logger.info("Method getAllAds is running");
         Collection<AdsDto> adsDto = adsService.getAllAds();
         if (adsDto.isEmpty()) {
@@ -99,7 +99,8 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping
+   @PostMapping
+   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
    public ResponseEntity<AdsDto> addAds(@RequestBody @Valid CreateAdsDto createAds) {
         logger.info("Method addAds is running: {}", createAds);
         return ResponseEntity.ok(adsService.addAds(createAds));
@@ -121,6 +122,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/me", params = {"idAuthor", "input"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Collection<AdsDto>> getAdsMeByTitle(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor,
                                                        String input){
         logger.info("Method getAdsMe is running: {} {}", idAuthor, input);
@@ -150,6 +152,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/me", params = {"idAuthor"})
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
                                                        @Min(1) Long idAuthor){
         logger.info("Method getAdsMe is running: {}", idAuthor);
@@ -178,6 +181,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/{ad_pk}/comment")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable @Min(1) Long ad_pk) {
         logger.info("Method getAdsComments is running: {}", ad_pk);
         Collection<AdsCommentDto> listOfAdsComment;
@@ -207,6 +211,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{ad_pk}/comment/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
         logger.info("Method deleteAdsComment is running: {} {}", ad_pk, id);
         try {
@@ -235,6 +240,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{ad_pk}/comment/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
         logger.info("Method getAdsComment is running: {} {}", ad_pk, id);
         AdsCommentDto foundAdsComment;
@@ -263,6 +269,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<?> removeAds(@PathVariable @Min(1) Long id) {
         logger.info("Method removeAds is running: {}", id);
         try {
@@ -289,6 +296,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<FullAdsDto> getAds(@PathVariable @Min(1) Long id) {
         logger.info("Method getAds is running: {}", id);
         FullAdsDto adsDto;
@@ -316,6 +324,7 @@ public class AdsController {
             }
     )
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<AdsDto> updateAds(@RequestBody @Valid AdsDto adsDto, @PathVariable @Min(1) Long id) {
         logger.info("Method updateAds is running: {} {}", adsDto, id);
         AdsDto adsUpdatedDto;
@@ -345,6 +354,7 @@ public class AdsController {
             }
     )
     @PostMapping("/{adsId}/comment")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable @Min(1) Long adsId,
                                                        @Valid @RequestBody AdsCommentDto adsComment){
         logger.info("Method addAdsComment is running: {} {}", adsId, adsComment);
@@ -377,6 +387,7 @@ public class AdsController {
             }
     )
     @PostMapping("/{ad_pk}/comment/{id}")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody @Valid AdsCommentDto adsComment,
                                                           @PathVariable @Min(1) Long ad_pk,
                                                           @PathVariable @Min(1) Long id) {

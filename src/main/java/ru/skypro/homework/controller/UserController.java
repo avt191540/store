@@ -9,12 +9,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.NewPasswordDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
+import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 import javax.validation.Valid;
@@ -33,24 +37,7 @@ public class UserController {
 
     private final UserService userService;
 
-    /**
-     * POST <a href="http://localhost:3000/users">...</a>
-     * Добавление пользователя.
-     * @param createUser пользователь
-     * @return добавленный пользователь в формате json
-     */
-    @Operation(
-            summary = "Добавление нового пользователя",
-            description = "Позволяет добавить пользователя в базу данных"
-    )
-    @PostMapping
-    public ResponseEntity<UserDto> addUser(@RequestBody @Valid CreateUserDto createUser){
-        logger.info("Method addUser is running: {}", createUser);
-        if (createUser == null){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-        return ResponseEntity.ok(userService.addUser(createUser));
-    }
+    private final AuthService authService;
 
     /**
      * Получить пользователя по его идентификатору, то-есть по id
@@ -68,6 +55,7 @@ public class UserController {
             }
     )
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable @Min(1) Long id){
         logger.info("Method getUser is running: {}", id);
         UserDto foundUserDto;
@@ -94,11 +82,12 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user){
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    public ResponseEntity<UserDto> updateUser(Authentication auth, @RequestBody @Valid UserDto user){
         logger.info("Method updateUser is running: {}", user);
         UserDto updateUser;
         try {
-            updateUser = userService.updateUser(user);
+            updateUser = userService.updateUser(auth.getName(), user);
         }
         catch (NotFoundException e){
             return ResponseEntity.notFound().build();
@@ -121,8 +110,17 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
+    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password){
         logger.info("Method setPassword is running: {}", password);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        try {
+            authService.changePassword(auth.getName(), password.getCurrentPassword(), password.getNewPassword());
+        } catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         return ResponseEntity.status(HttpStatus.OK).body(password);
     }
 
@@ -134,6 +132,7 @@ public class UserController {
             description = "Позволяет получить всех пользователей из базы данных"
     )
     @GetMapping("/me")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Collection<UserDto>> getUsers(){
         logger.info("Method getUsers is running");
         Collection<UserDto> usersDto = userService.getAllUsers();
