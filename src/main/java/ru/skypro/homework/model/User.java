@@ -3,7 +3,6 @@ package ru.skypro.homework.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.Hibernate;
-import ru.skypro.homework.dto.Role;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -21,17 +20,23 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_user", unique = true)
     private Long id;
-    private String userName;
+    private String username;
     private String firstName;
     private String lastName;
     private String phone;
     private String email;
     private String password;
-    private Role role;
+    private boolean enabled;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @PrimaryKeyJoinColumn
+    private Authorities authority;
+
     @OneToMany(mappedBy = "user", cascade=CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude
     private Collection<Ads> ads;
+
     @OneToMany(mappedBy = "user", cascade=CascadeType.ALL)
     @JsonIgnore
     @ToString.Exclude

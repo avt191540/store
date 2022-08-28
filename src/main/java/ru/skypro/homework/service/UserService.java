@@ -13,5 +13,9 @@ public interface UserService {
 
     UserDto getUserById(Long id);
 
+    void savePassword(String userName, String password);
+
+    void updateUserRegistration(User user);
+
     Collection<UserDto> getAllUsers();
 }

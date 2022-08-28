@@ -98,25 +98,23 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     @Transactional
-    public void deleteCommentToAds(Long ad_pk, Long id) throws NotFoundException {
-        if(commentRepository.deleteCommentToAdsById(ad_pk, id) != 1){
+    public void deleteCommentToAds(Long idAds, Long id) throws NotFoundException {
+        if(commentRepository.deleteCommentToAdsById(idAds, id) != 1){
             throw new NotFoundException();
         }
     }
 
     @Override
-    public AdsCommentDto getAdsComment(Long ad_pk, Long id) throws NotFoundException {
+    public AdsCommentDto getAdsComment(Long idAds, Long id) throws NotFoundException {
         AdsComment foundComment = commentRepository
-                .getCommentToAdsById(ad_pk, id).orElseThrow(NotFoundException::new);
+                .getCommentToAdsById(idAds, id).orElseThrow(NotFoundException::new);
 
         return commentMapper.entityToDto(foundComment);
     }
 
     @Override
-    public void removeAds(Long id) throws NotFoundException {
-        if (adsRepository.deleteAdsById(id) != 1){
-            throw new NotFoundException();
-        }
+    public void removeAds(Long id) {
+        adsRepository.deleteById(id);
     }
 
     @Override
@@ -140,8 +138,8 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsCommentDto addAdsComment(Long ad_pk, AdsCommentDto adsComment) throws NotFoundException {
-        Ads foundAds = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
+    public AdsCommentDto addAdsComment(Long idAds, AdsCommentDto adsComment) throws NotFoundException {
+        Ads foundAds = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
 
         logger.info("User owner advertisement: {}", foundAds.getUser());
 
@@ -153,13 +151,12 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public AdsCommentDto updateAdsComment(AdsCommentDto adsCommentDto, Long ad_pk, Long id) throws NotFoundException {
-        Ads ads;
-        AdsComment commentUpdate;
+    public AdsCommentDto updateAdsComment(AdsCommentDto adsCommentDto, Long idAds, Long id) throws NotFoundException {
         logger.info("Result from commentsRepository: {}", commentRepository.existsAdsCommentById(id));
+
         if (commentRepository.existsAdsCommentById(id)) {
-            ads = adsRepository.findById(ad_pk).orElseThrow(NotFoundException::new);
-            commentUpdate = commentMapper.adsCommentDtoToEntity(adsCommentDto, ads);
+            Ads ads = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
+            AdsComment commentUpdate = commentMapper.adsCommentDtoToEntity(adsCommentDto, ads);
             commentRepository.save(commentUpdate);
             return commentMapper.entityToDto(commentUpdate);
         }

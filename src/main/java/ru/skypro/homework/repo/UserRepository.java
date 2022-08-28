@@ -1,7 +1,9 @@
 package ru.skypro.homework.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import ru.skypro.homework.model.User;
 
@@ -11,15 +13,24 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query(value = "select * from users order by first_name, last_name", nativeQuery = true)
+    @Query("select u from User u order by u.firstName, u.lastName")
     Optional<Collection<User>> getAll();
 
-    User findUserByUserName(String userName);
+    Optional<User> getUserByUsername (String userName);
 
-    User getUserByUserName (String userName);
+    boolean existsUserByEmail(String email);
 
-    Long getIdByUserName (String userName);
+    @Query("select u.id from User u where u.username = :username")
+    Long getIdUserByUsername(@Param(value = "username") String username);
 
-    boolean existsUserByUserName (String userName);
+    @Modifying
+    @Query("update User u set u.password = :newPassword where u.email = :userName")
+    void updatePassword(@Param(value = "userName") String userName,
+                        @Param(value = "newPassword") String newPassword);
 
+    @Modifying
+    @Query("update User u set u.email = :email, u.password = :password, u.firstName = :firstName, u.lastName = :lastName, u.phone = :phone where u.id = :idUser")
+    void updateUserRegistration(@Param(value = "email") String email, @Param(value = "password") String password,
+                                @Param(value = "firstName") String firstName, @Param(value = "lastName") String lastName,
+                                @Param(value = "phone") String phone, @Param(value = "idUser") Long idUser);
 }

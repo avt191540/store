@@ -3,6 +3,7 @@ package ru.skypro.homework.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
@@ -25,20 +26,25 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
-    public UserDto addUser(CreateUserDto createUser){
-        User user = userMapper.createUserDtoToUser(createUser);
+    public UserDto addUser(CreateUserDto createUserDto){
+        User user = userMapper.createUserDtoToUser(createUserDto);
         userRepository.save(user);
         return userMapper.userToUserDto(user);
     }
 
     public UserDto updateUser(String userName,UserDto userDto) throws NotFoundException {
         logger.info("Method updateUser was started");
-        User user = userRepository.findUserByUserName(userName);
-        user.setFirstName(userDto.getFirstName());
-        user.setLastName(userDto.getLastName());
-        user.setPhone(userDto.getPhone());
+        User user = userRepository.getUserByUsername(userName).orElseThrow(NotFoundException::new);
+        if (userDto.getFirstName() != null || !userDto.getFirstName().isEmpty()) {
+            user.setFirstName(userDto.getFirstName());
+        }
+        if (userDto.getLastName() != null || !userDto.getLastName().isEmpty()) {
+            user.setLastName(userDto.getLastName());
+        }
+        if (userDto.getPhone() != null || !userDto.getPhone().isEmpty()) {
+            user.setPhone(userDto.getPhone());
+        }
         userRepository.save(user);
-        logger.info("Mapping from User to UserDto: {}",userMapper.userToUserDto(user));
         return userMapper.userToUserDto(user);
     }
 
@@ -46,6 +52,22 @@ public class UserServiceImpl implements UserService {
     public UserDto getUserById(Long id) throws NotFoundException {
         User foundUser = userRepository.findById(id).orElseThrow(NotFoundException::new);
         return userMapper.userToUserDto(foundUser);
+    }
+
+    @Transactional
+    @Override
+    public void savePassword(String userName, String newPassword) throws NotFoundException {
+        if (userRepository.existsUserByEmail(userName)) {
+            userRepository.updatePassword(userName, newPassword);
+        }
+        throw new NotFoundException();
+    }
+
+    @Transactional
+    @Override
+    public void updateUserRegistration(User user) {
+        userRepository.updateUserRegistration(user.getEmail(), user.getPassword(), user.getFirstName(), user.getLastName(),
+                user.getPhone(), user.getId());
     }
 
     @Override
