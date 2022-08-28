@@ -41,17 +41,14 @@ public class AdsServiceImpl implements AdsService {
 
     private final AdsCommentMapper commentMapper;
 
-    private final AuthServiceImpl authService;
-
     public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, AdsCommentRepository commentRepository,
-                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper, AuthServiceImpl authService) {
+                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
         this.commentRepository = commentRepository;
         this.pictureRepository = pictureRepository;
         this.adsMapper = adsMapper;
         this.commentMapper = commentMapper;
-        this.authService = authService;
     }
 
     @Override
@@ -64,14 +61,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAllAdsByTitle(String input) throws NotFoundException {
-        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(input).get();
+    public Collection<AdsDto> getAllAdsByTitle(String input) {
+        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(input);
         return adsMapper.entitiesToDto(adsCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAdsMeByTitle(Long id, String input) throws NotFoundException {
-        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input).orElseThrow(NotFoundException::new);
+    public Collection<AdsDto> getAdsMeByTitle(Long id, String input) {
+        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input);
         return adsMapper.entitiesToDto(adsMe);
     }
 
@@ -82,17 +79,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAdsMe(Long id) throws NotFoundException {
-        Long currentId = authService.getIdCurrentUser();
-        Collection<Ads> adsMe = adsRepository.findAllByUserId(currentId).orElseThrow(NotFoundException::new);
-
+    public Collection<AdsDto> getAdsMe(Long id) {
+        Collection<Ads> adsMe = adsRepository.findAllByUserId(id);
         return adsMapper.entitiesToDto(adsMe);
     }
 
     @Override
-    public Collection<AdsCommentDto> getAdsComments(Long id) throws NotFoundException {
-        Collection<AdsComment> adsComments = commentRepository.findAdsCommentsByAds_IdOrderByCreatedAtDesc(id)
-                .orElseThrow(NotFoundException::new);
+    public Collection<AdsCommentDto> getAdsComments(Long id) {
+        Collection<AdsComment> adsComments = commentRepository.findAdsCommentsByAds_IdOrderByCreatedAtDesc(id);
         return commentMapper.entitiesToDto(adsComments);
     }
 
@@ -106,9 +100,7 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsCommentDto getAdsComment(Long idAds, Long id) throws NotFoundException {
-        AdsComment foundComment = commentRepository
-                .getCommentToAdsById(idAds, id).orElseThrow(NotFoundException::new);
-
+        AdsComment foundComment = commentRepository.getCommentToAdsById(idAds, id).orElseThrow(NotFoundException::new);
         return commentMapper.entityToDto(foundComment);
     }
 
@@ -120,7 +112,6 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public FullAdsDto getAds(Long id) throws NotFoundException {
         Ads ads = adsRepository.findById(id).orElseThrow(NotFoundException::new);
-        logger.info("User owner advertisement: {} {}", id, ads.getUser());
         return adsMapper.adsToFullAdsDto(ads, ads.getUser());
     }
 
@@ -141,8 +132,6 @@ public class AdsServiceImpl implements AdsService {
     public AdsCommentDto addAdsComment(Long idAds, AdsCommentDto adsComment) throws NotFoundException {
         Ads foundAds = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
 
-        logger.info("User owner advertisement: {}", foundAds.getUser());
-
         AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, foundAds);
         newComment.setAds(foundAds);
         commentRepository.save(newComment);
@@ -152,8 +141,6 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public AdsCommentDto updateAdsComment(AdsCommentDto adsCommentDto, Long idAds, Long id) throws NotFoundException {
-        logger.info("Result from commentsRepository: {}", commentRepository.existsAdsCommentById(id));
-
         if (commentRepository.existsAdsCommentById(id)) {
             Ads ads = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
             AdsComment commentUpdate = commentMapper.adsCommentDtoToEntity(adsCommentDto, ads);

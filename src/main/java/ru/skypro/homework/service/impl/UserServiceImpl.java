@@ -32,18 +32,13 @@ public class UserServiceImpl implements UserService {
         return userMapper.userToUserDto(user);
     }
 
-    public UserDto updateUser(String userName,UserDto userDto) throws NotFoundException {
+    public UserDto updateUser(String username,UserDto userDto) throws NotFoundException {
         logger.info("Method updateUser was started");
-        User user = userRepository.getUserByUsername(userName).orElseThrow(NotFoundException::new);
-        if (userDto.getFirstName() != null || !userDto.getFirstName().isEmpty()) {
-            user.setFirstName(userDto.getFirstName());
-        }
-        if (userDto.getLastName() != null || !userDto.getLastName().isEmpty()) {
-            user.setLastName(userDto.getLastName());
-        }
-        if (userDto.getPhone() != null || !userDto.getPhone().isEmpty()) {
-            user.setPhone(userDto.getPhone());
-        }
+        User user = userRepository.getUserByUsername(username).orElseThrow(NotFoundException::new);
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
+        user.setPhone(userDto.getPhone());
+        user.setEmail(userDto.getEmail());
         userRepository.save(user);
         return userMapper.userToUserDto(user);
     }
@@ -56,9 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Transactional
     @Override
-    public void savePassword(String userName, String newPassword) throws NotFoundException {
-        if (userRepository.existsUserByEmail(userName)) {
-            userRepository.updatePassword(userName, newPassword);
+    public void savePassword(String username, String newPassword) throws NotFoundException {
+        if (userRepository.existsUserByUsername(username)) {
+            userRepository.updatePassword(username, newPassword);
         }
         throw new NotFoundException();
     }

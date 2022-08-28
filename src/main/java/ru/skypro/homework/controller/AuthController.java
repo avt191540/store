@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.LoginReq;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.repo.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
@@ -38,16 +37,8 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterReq req) {
-        User user = new User();
         Role role = req.getRole() == null ? USER : req.getRole();
         if (authService.register(req, role)) {
-            user.setEmail(req.getUsername());
-            user.setUserName(req.getUsername());
-            user.setPassword(req.getPassword());
-            user.setFirstName(req.getFirstName());
-            user.setLastName(req.getLastName());
-            user.setPhone(req.getPhone());
-            userRepository.save(user);
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();

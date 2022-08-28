@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
@@ -43,16 +44,16 @@ public class AuthServiceImpl implements AuthService {
 
     /**
      * Authorization by username and password
-     * @param userName - get from client
+     * @param username - get from client
      * @param password - get from client
      * @return type boolean result of login process
      */
     @Override
-    public boolean login(String userName, String password) {
-        if (!userRepository.existsUserByUserName(userName)) {
+    public boolean login(String username, String password) {
+        if (!userRepository.existsUserByUsername(username)) {
             return false;
         }
-        String encryptedPassword = getEncryptedPassword(userName);
+        String encryptedPassword = getEncryptedPassword(username);
         String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
         return encoder.matches(password, encryptedPasswordWithoutEncryptionType);
     }
