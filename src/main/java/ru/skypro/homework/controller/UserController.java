@@ -85,6 +85,8 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<UserDto> updateUser(Authentication auth, @RequestBody @Valid UserDto user){
         logger.info("Method updateUser is running: {}", user);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         UserDto updateUser;
         try {
             updateUser = userService.updateUser(auth.getName(), user);
