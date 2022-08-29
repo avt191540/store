@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.CreateUserDto;
+import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.mapper.UserMapper;
@@ -66,7 +67,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Collection<UserDto> getAllUsers() {
-        return userMapper.entitiesToDto(userRepository.getAll().get());
+    public ResponseWrapperUser getAllUsers() {
+        Collection<UserDto> usersDto = userMapper.entitiesToDto(userRepository.getAll());
+        ResponseWrapperUser wrapperUsers = new ResponseWrapperUser();
+        wrapperUsers.setCount(usersDto.size());
+        wrapperUsers.setResults(usersDto);
+        return wrapperUsers;
     }
 }

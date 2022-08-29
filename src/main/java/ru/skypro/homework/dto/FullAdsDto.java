@@ -3,20 +3,17 @@ package ru.skypro.homework.dto;
 import lombok.Data;
 import ru.skypro.homework.model.Picture;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Collection;
 
 @Data
 public class FullAdsDto {
     @NotBlank(message = "FirstName shouldn`t be blank")
-    @Size(min = 5, message = "FirstName should be at least 5 chars")
+    @Size(min = 3, message = "FirstName should be at least 3 chars")
     private String authorFirstName;
 
     @NotBlank(message = "FirstName shouldn`t be blank")
-    @Size(min = 5, message = "FirstName should be at least 5 chars")
+    @Size(min = 3, message = "FirstName should be at least 3 chars")
     private String authorLastName;
 
     @Size(max = 700, message = "Description should be at least 700 chars")
@@ -29,7 +26,7 @@ public class FullAdsDto {
 
     private Collection<Picture> image;
 
-    @Size(min = 10, message = "Phone should be at least 10 chars")
+    @Pattern(regexp = "((\\d{1,3}?|\\+\\d\\s?|\\+?|\\+\\d{3}\\s?|\\(?|-?)?\\d{2}(\\(?\\d{2}\\)?[\\- ]?)?[\\d\\- ]{7,10})")
     private String phone;
 
     @Min((1))

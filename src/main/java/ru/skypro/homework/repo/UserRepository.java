@@ -14,7 +14,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u order by u.firstName, u.lastName")
-    Optional<Collection<User>> getAll();
+    Collection<User> getAll();
 
     Optional<User> getUserByUsername (String userName);
 
