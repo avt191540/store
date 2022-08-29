@@ -13,11 +13,11 @@ public interface AdsCommentRepository extends JpaRepository<AdsComment, Long> {
     Collection<AdsComment> findAdsCommentsByAds_IdOrderByCreatedAtDesc(Long id);
 
     @Modifying
-    @Query(value = "delete from comments where id_ads = :idAds and id_comment = :id", nativeQuery = true)
-    int deleteCommentToAdsById(Long idAds, Long id);
+    @Query("delete from AdsComment where ads.id = :idAds and id = :idComment")
+    int deleteCommentToAdsById(Long idAds, Long idComment);
 
-    @Query(value = "select * from comments where id_ads = :ad_pk and id_comment = :id", nativeQuery = true)
-    Optional<AdsComment> getCommentToAdsById(Long ad_pk, Long id);
+    @Query("select AdsComment from AdsComment where ads.id = :idAds and id = :idComment")
+    Optional<AdsComment> getCommentToAdsById(Long idAds, Long idComment);
 
     boolean existsAdsCommentById(Long id);
 }

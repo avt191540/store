@@ -14,7 +14,6 @@ import java.util.Objects;
 @Entity
 @Table(name = "comments")
 public class AdsComment {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_comment", unique = true)

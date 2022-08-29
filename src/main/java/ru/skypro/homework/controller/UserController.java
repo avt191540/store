@@ -39,6 +39,8 @@ public class UserController {
 
     private final AuthService authService;
 
+    private final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+
     /**
      * Получить пользователя по его идентификатору, то-есть по id
      * GET <a href="http://localhost:3000/users/">...</a>{id}
@@ -83,10 +85,8 @@ public class UserController {
     )
     @PatchMapping("/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<UserDto> updateUser(Authentication auth, @RequestBody @Valid UserDto user){
+    public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user){
         logger.info("Method updateUser is running: {}", user);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userName = authentication.getName();
         UserDto updateUser;
         try {
             updateUser = userService.updateUser(auth.getName(), user);
@@ -115,7 +115,6 @@ public class UserController {
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password){
         logger.info("Method setPassword is running: {}", password);
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         try {
             authService.changePassword(auth.getName(), password.getCurrentPassword(), password.getNewPassword());
         } catch (NotFoundException e){
