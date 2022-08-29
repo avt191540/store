@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.skypro.homework.dto.NewPasswordDto;
+import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.AuthService;
@@ -23,7 +24,6 @@ import ru.skypro.homework.service.UserService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -134,12 +134,11 @@ public class UserController {
     )
     @GetMapping("/me")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Collection<UserDto>> getUsers(){
+    public ResponseEntity<ResponseWrapperUser> getUsers(){
         logger.info("Method getUsers is running");
-        Collection<UserDto> usersDto = userService.getAllUsers();
-        if (usersDto.isEmpty()) {
+        if (userService.getAllUsers().getResults().isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(usersDto);
+        return ResponseEntity.ok(userService.getAllUsers());
     }
 }

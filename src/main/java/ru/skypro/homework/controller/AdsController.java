@@ -10,18 +10,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsDto;
-import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Collection;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -35,6 +33,8 @@ public class AdsController {
     private final Logger logger = LoggerFactory.getLogger(AdsController.class);
 
     private final AdsService adsService;
+
+    private final CommentService commentService;
 
     /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
@@ -50,13 +50,13 @@ public class AdsController {
             }
     )
     @GetMapping()
-    public ResponseEntity<Collection<AdsDto>> getAllAds() {
+    public ResponseEntity<ResponseWrapperAds> getAllAds() {
         logger.info("Method getAllAds is running");
-        Collection<AdsDto> adsDto = adsService.getAllAds();
-        if (adsDto.isEmpty()) {
+        ResponseWrapperAds wrapperAds = adsService.getAllAds();
+        if (wrapperAds.getResults().isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(adsDto);
+        return ResponseEntity.ok(wrapperAds);
     }
 
     /**
@@ -75,13 +75,13 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/title", params = {"input"})
-    public ResponseEntity<Collection<AdsDto>> getAllAdsByTitle(@RequestParam String input) {
+    public ResponseEntity<ResponseWrapperAds> getAllAdsByTitle(@RequestParam String input) {
         logger.info("Method getAllAds is running");
-        Collection<AdsDto> adsDto = adsService.getAllAdsByTitle(input);
-        if (adsDto.isEmpty()) {
+        ResponseWrapperAds wrapperAds = adsService.getAllAdsByTitle(input);
+        if (wrapperAds.getResults().isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(adsDto);
+        return ResponseEntity.ok(wrapperAds);
     }
 
     /**
@@ -110,7 +110,7 @@ public class AdsController {
     /**
      * Получить все объявления автора по заголовку GET <a href="http://localhost:3000/ads">...</a>
      * @param input строка содержащаяся в заголовке объявления
-     * @param idAuthor идентификатор автора объявления
+     * @param auth данные аутентифицированного пользователя
      **/
     @Operation(
             summary = "Получить все объявления автора по заголовку",
@@ -122,24 +122,22 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(value = "/me", params = {"idAuthor", "input"})
+    @GetMapping(value = "/me", params = {"input"})
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Collection<AdsDto>> getAdsMeByTitle(@RequestParam(value = "idAuthor") @Min(1) Long idAuthor,
-                                                       String input){
-        logger.info("Method getAdsMe is running: {} {}", idAuthor, input);
-        Collection<AdsDto> listAdsMe;
-        try {
-            listAdsMe = adsService.getAdsMeByTitle(idAuthor, input);
-        } catch (NotFoundException e){
+    public ResponseEntity<ResponseWrapperAds> getAdsMeByTitle(Authentication auth, String input){
+        logger.info("Method getAdsMe is running: {} {}", auth, input);
+
+        ResponseWrapperAds wrapperAds = adsService.getAdsMeByTitle(auth.getName(), input);
+        if (wrapperAds.getResults().isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(listAdsMe);
+        return ResponseEntity.ok(wrapperAds);
     }
 
     /**
      * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
      * Получить объявления автора содержащие определенную строку.
-     * @param idAuthor идентификатор автора
+     * @param auth данные аутентифицированного пользователя
      * @return возвращаемая коллекция объявлений
      **/
     @Operation(
@@ -152,18 +150,16 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(value = "/me", params = {"idAuthor"})
+    @GetMapping(value = "/me")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Collection<AdsDto>> getAdsMe(@RequestParam(value = "idAuthor")
-                                                       @Min(1) Long idAuthor){
-        logger.info("Method getAdsMe is running: {}", idAuthor);
-        Collection<AdsDto> listAdsMe;
-        try {
-            listAdsMe = adsService.getAdsMe(idAuthor);
-        } catch (NotFoundException e){
+    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication auth){
+        logger.info("Method getAdsMe is running: {}", auth);
+
+        ResponseWrapperAds wrapperAds = adsService.getAdsMe(auth.getName());
+        if (wrapperAds.getResults().isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(listAdsMe);
+        return ResponseEntity.ok(wrapperAds);
     }
 
     /**
@@ -183,15 +179,13 @@ public class AdsController {
     )
     @GetMapping(value = "/{idAds}/comment")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable @Min(1) Long idAds) {
+    public ResponseEntity<ResponseWrapperAdsComment> getAdsComments(@PathVariable @Min(1) Long idAds) {
         logger.info("Method getAdsComments is running: {}", idAds);
-        Collection<AdsCommentDto> listOfAdsComment;
-        try{
-            listOfAdsComment = adsService.getAdsComments(idAds);
-        } catch (NotFoundException e){
+        ResponseWrapperAdsComment wrapperAdsComment = commentService.getAdsComments(idAds);
+        if (wrapperAdsComment.getResults().isEmpty()){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(listOfAdsComment);
+        return ResponseEntity.ok(wrapperAdsComment);
     }
 
     /**
@@ -216,7 +210,7 @@ public class AdsController {
     public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long idAds, @PathVariable @Min(1) Long id){
         logger.info("Method deleteAdsComment is running: {} {}", idAds, id);
         try {
-            adsService.deleteCommentToAds(idAds, id);
+            commentService.deleteCommentToAds(idAds, id);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -246,7 +240,7 @@ public class AdsController {
         logger.info("Method getAdsComment is running: {} {}", idAds, id);
         AdsCommentDto foundAdsComment;
         try {
-            foundAdsComment = adsService.getAdsComment(idAds, id);
+            foundAdsComment = commentService.getAdsComment(idAds, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -361,7 +355,7 @@ public class AdsController {
         logger.info("Method addAdsComment is running: {} {}", idAds, adsComment);
         AdsCommentDto newCommentDto;
         try {
-            newCommentDto = adsService.addAdsComment(idAds, adsComment);
+            newCommentDto = commentService.addAdsComment(idAds, adsComment);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -395,7 +389,7 @@ public class AdsController {
         logger.info("Method createAdsComment is running: {} {} {}", adsComment, idAds, id);
         AdsCommentDto commentDto;
         try {
-            commentDto = adsService.updateAdsComment(adsComment, idAds, id);
+            commentDto = commentService.updateAdsComment(adsComment, idAds, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }

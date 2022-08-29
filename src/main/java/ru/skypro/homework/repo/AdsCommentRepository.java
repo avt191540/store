@@ -16,8 +16,7 @@ public interface AdsCommentRepository extends JpaRepository<AdsComment, Long> {
     @Query("delete from AdsComment where ads.id = :idAds and id = :idComment")
     int deleteCommentToAdsById(Long idAds, Long idComment);
 
-    @Query("select AdsComment from AdsComment where ads.id = :idAds and id = :idComment")
-    Optional<AdsComment> getCommentToAdsById(Long idAds, Long idComment);
+    Optional<AdsComment> findAdsCommentByIdAndAds_Id(Long idAds, Long idComment);
 
     boolean existsAdsCommentById(Long id);
 }

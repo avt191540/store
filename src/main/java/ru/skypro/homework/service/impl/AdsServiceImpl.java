@@ -3,28 +3,20 @@ package ru.skypro.homework.service.impl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import ru.skypro.homework.dto.AdsCommentDto;
-import ru.skypro.homework.dto.AdsDto;
-import ru.skypro.homework.dto.CreateAdsDto;
-import ru.skypro.homework.dto.FullAdsDto;
+import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.NotFoundException;
-import ru.skypro.homework.mapper.AdsCommentMapper;
 import ru.skypro.homework.mapper.AdsMapper;
 import ru.skypro.homework.model.Ads;
-import ru.skypro.homework.model.AdsComment;
 import ru.skypro.homework.model.Picture;
 import ru.skypro.homework.model.User;
-import ru.skypro.homework.repo.AdsCommentRepository;
 import ru.skypro.homework.repo.AdsRepository;
 import ru.skypro.homework.repo.PictureRepository;
 import ru.skypro.homework.repo.UserRepository;
 import ru.skypro.homework.service.AdsService;
 
-import javax.transaction.Transactional;
 import java.util.Collection;
 
 @Service
-@Transactional
 public class AdsServiceImpl implements AdsService {
 
     private final Logger logger = LoggerFactory.getLogger(AdsServiceImpl.class);
@@ -33,22 +25,16 @@ public class AdsServiceImpl implements AdsService {
 
     private final UserRepository userRepository;
 
-    private final AdsCommentRepository commentRepository;
-
     private final PictureRepository pictureRepository;
 
     private final AdsMapper adsMapper;
 
-    private final AdsCommentMapper commentMapper;
-
-    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, AdsCommentRepository commentRepository,
-                          PictureRepository pictureRepository, AdsMapper adsMapper, AdsCommentMapper commentMapper) {
+    public AdsServiceImpl(AdsRepository adsRepository, UserRepository userRepository, PictureRepository pictureRepository,
+                          AdsMapper adsMapper) {
         this.adsRepository = adsRepository;
         this.userRepository = userRepository;
-        this.commentRepository = commentRepository;
         this.pictureRepository = pictureRepository;
         this.adsMapper = adsMapper;
-        this.commentMapper = commentMapper;
     }
 
     @Override
@@ -61,47 +47,28 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public Collection<AdsDto> getAllAdsByTitle(String input) {
-        Collection<Ads> adsCollection = adsRepository.findAllByTitleContainsIgnoreCase(input);
-        return adsMapper.entitiesToDto(adsCollection);
+    public ResponseWrapperAds getAllAdsByTitle(String input) {
+        Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.findAllByTitleContainsIgnoreCase(input));
+        return getWrapperAds(adsDtoCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAdsMeByTitle(Long id, String input) {
-        Collection<Ads> adsMe = adsRepository.findAllByUserIdAndTitleContainsIgnoreCase(id, input);
-        return adsMapper.entitiesToDto(adsMe);
+    public ResponseWrapperAds getAdsMeByTitle(String username, String input) {
+        Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository
+                .findAllByUser_UsernameAndTitleContainsIgnoreCase(username, input));
+        return getWrapperAds(adsDtoCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAllAds() {
-        Collection<Ads> adsCollection = adsRepository.findAll();
-        return adsMapper.entitiesToDto(adsCollection);
+    public ResponseWrapperAds getAllAds() {
+        Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.getAllAds());
+        return getWrapperAds(adsDtoCollection);
     }
 
     @Override
-    public Collection<AdsDto> getAdsMe(Long id) {
-        Collection<Ads> adsMe = adsRepository.findAllByUserId(id);
-        return adsMapper.entitiesToDto(adsMe);
-    }
-
-    @Override
-    public Collection<AdsCommentDto> getAdsComments(Long id) {
-        Collection<AdsComment> adsComments = commentRepository.findAdsCommentsByAds_IdOrderByCreatedAtDesc(id);
-        return commentMapper.entitiesToDto(adsComments);
-    }
-
-    @Override
-    @Transactional
-    public void deleteCommentToAds(Long idAds, Long id) throws NotFoundException {
-        if(commentRepository.deleteCommentToAdsById(idAds, id) != 1){
-            throw new NotFoundException();
-        }
-    }
-
-    @Override
-    public AdsCommentDto getAdsComment(Long idAds, Long id) throws NotFoundException {
-        AdsComment foundComment = commentRepository.getCommentToAdsById(idAds, id).orElseThrow(NotFoundException::new);
-        return commentMapper.entityToDto(foundComment);
+    public ResponseWrapperAds getAdsMe(String username) {
+        Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.findAllByUser_Username(username));
+        return getWrapperAds(adsDtoCollection);
     }
 
     @Override
@@ -128,25 +95,10 @@ public class AdsServiceImpl implements AdsService {
         throw new NotFoundException();
     }
 
-    @Override
-    public AdsCommentDto addAdsComment(Long idAds, AdsCommentDto adsComment) throws NotFoundException {
-        Ads foundAds = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
-
-        AdsComment newComment = commentMapper.adsCommentDtoToEntity(adsComment, foundAds);
-        newComment.setAds(foundAds);
-        commentRepository.save(newComment);
-
-        return commentMapper.entityToDto(newComment);
-    }
-
-    @Override
-    public AdsCommentDto updateAdsComment(AdsCommentDto adsCommentDto, Long idAds, Long id) throws NotFoundException {
-        if (commentRepository.existsAdsCommentById(id)) {
-            Ads ads = adsRepository.findById(idAds).orElseThrow(NotFoundException::new);
-            AdsComment commentUpdate = commentMapper.adsCommentDtoToEntity(adsCommentDto, ads);
-            commentRepository.save(commentUpdate);
-            return commentMapper.entityToDto(commentUpdate);
-        }
-        throw new NotFoundException();
+    private ResponseWrapperAds getWrapperAds(Collection<AdsDto> collection){
+        ResponseWrapperAds wrapperAds = new ResponseWrapperAds();
+        wrapperAds.setCount(collection.size());
+        wrapperAds.setResults(collection);
+        return wrapperAds;
     }
 }
