@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.skypro.homework.dto.LoginReq;
 import ru.skypro.homework.dto.RegisterReq;
 import ru.skypro.homework.dto.Role;
-import ru.skypro.homework.repo.UserRepository;
 import ru.skypro.homework.service.AuthService;
 
 import static ru.skypro.homework.dto.Role.USER;
@@ -21,10 +20,7 @@ import static ru.skypro.homework.dto.Role.USER;
 @RestController
 @RequiredArgsConstructor
 public class AuthController {
-
     private final AuthService authService;
-
-    private final UserRepository userRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginReq req) {

@@ -37,34 +37,8 @@ public class AdsController {
     private final AdsService adsService;
 
     /**
-     * Получить все существующие объявления по строке содержащейся в заголовке GET <a href="http://localhost:3000/ads">...</a>
-     * @param input строка для поиска объявлений по названию
-     **/
-    @Operation(
-            summary = "Получить все объявления по названию",
-            description = "Получение всех объявлений по названию",
-
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "Объявления получены"
-                    )
-            }
-    )
-    @GetMapping(params = {"input"})
-    public ResponseEntity<Collection<AdsDto>> getAllAdsByTitle(@RequestParam String input) {
-        logger.info("Method getAllAds is running");
-        Collection<AdsDto> adsDto = adsService.getAllAdsByTitle(input);
-        if (adsDto.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(adsDto);
-    }
-
-    /**
      * Получить все существующие объявления GET <a href="http://localhost:3000/ads">...</a>
      **/
-
     @Operation(
             summary = "Получить все объявления",
             description = "Получение всех объявлений",
@@ -79,6 +53,31 @@ public class AdsController {
     public ResponseEntity<Collection<AdsDto>> getAllAds() {
         logger.info("Method getAllAds is running");
         Collection<AdsDto> adsDto = adsService.getAllAds();
+        if (adsDto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(adsDto);
+    }
+
+    /**
+     * Получить все существующие объявления по строке содержащейся в заголовке GET <a href="http://localhost:3000/ads/title">...</a>
+     * @param input строка для поиска объявлений по названию
+     **/
+    @Operation(
+            summary = "Получить все объявления по названию",
+            description = "Получение всех объявлений по названию",
+
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Объявления получены"
+                    )
+            }
+    )
+    @GetMapping(value = "/title", params = {"input"})
+    public ResponseEntity<Collection<AdsDto>> getAllAdsByTitle(@RequestParam String input) {
+        logger.info("Method getAllAds is running");
+        Collection<AdsDto> adsDto = adsService.getAllAdsByTitle(input);
         if (adsDto.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
@@ -168,9 +167,9 @@ public class AdsController {
     }
 
     /**
-     * Получить все комментарии(отзывы) к объявлению GET <a href="http://localhost:3000/ads/">...</a>{ad_pk}/comment
+     * Получить все комментарии(отзывы) к объявлению GET <a href="http://localhost:3000/ads/">...</a>{idAds}/comment
      * Объявление должно существовать. Используется идентификатор объявления "ad_pk"
-     * @param ad_pk идентификатор объявления
+     * @param idAds идентификатор объявления
      **/
     @Operation(
             summary = "Получить все отзывы к объявлению",
@@ -182,13 +181,13 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping(value = "/{ad_pk}/comment")
+    @GetMapping(value = "/{idAds}/comment")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable @Min(1) Long ad_pk) {
-        logger.info("Method getAdsComments is running: {}", ad_pk);
+    public ResponseEntity<Collection<AdsCommentDto>> getAdsComments(@PathVariable @Min(1) Long idAds) {
+        logger.info("Method getAdsComments is running: {}", idAds);
         Collection<AdsCommentDto> listOfAdsComment;
         try{
-            listOfAdsComment = adsService.getAdsComments(ad_pk);
+            listOfAdsComment = adsService.getAdsComments(idAds);
         } catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -196,9 +195,9 @@ public class AdsController {
     }
 
     /**
-     * DELETE <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment/{id}
+     * DELETE <a href="http://localhost:3000/ads">...</a>{idAds}/comment/{id}
      * Удаление комментария к объявлению.
-     * @param ad_pk идентификатор объявления
+     * @param idAds идентификатор объявления
      * @param id идентификатор комментария к объявлению
      * @return статус ок если успешно был удален комментарий
      */
@@ -212,12 +211,12 @@ public class AdsController {
                     )
             }
     )
-    @DeleteMapping("/{ad_pk}/comment/{id}")
+    @DeleteMapping("/{idAds}/comment/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
-        logger.info("Method deleteAdsComment is running: {} {}", ad_pk, id);
+    public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long idAds, @PathVariable @Min(1) Long id){
+        logger.info("Method deleteAdsComment is running: {} {}", idAds, id);
         try {
-            adsService.deleteCommentToAds(ad_pk, id);
+            adsService.deleteCommentToAds(idAds, id);
         } catch (NotFoundException e) {
             return ResponseEntity.notFound().build();
         }
@@ -225,9 +224,9 @@ public class AdsController {
     }
 
     /**
-     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
+     * POST <a href="http://localhost:3000/ads">...</a>{idAds}/comment/{id}
      * Получение комментария к объявлению.
-     * @param ad_pk идентификатор объявления
+     * @param idAds идентификатор объявления
      * @param id идентификатор
      * @return комментарий к объявлению в формате json
      */
@@ -241,13 +240,13 @@ public class AdsController {
                     )
             }
     )
-    @GetMapping("/{ad_pk}/comment/{id}")
+    @GetMapping("/{idAds}/comment/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable @Min(1) Long ad_pk, @PathVariable @Min(1) Long id){
-        logger.info("Method getAdsComment is running: {} {}", ad_pk, id);
+    public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable @Min(1) Long idAds, @PathVariable @Min(1) Long id){
+        logger.info("Method getAdsComment is running: {} {}", idAds, id);
         AdsCommentDto foundAdsComment;
         try {
-            foundAdsComment = adsService.getAdsComment(ad_pk, id);
+            foundAdsComment = adsService.getAdsComment(idAds, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -339,9 +338,9 @@ public class AdsController {
     }
 
     /**
-     * POST <a href="http://localhost:3000/ads">...</a>{ad_pk}/comment
+     * POST <a href="http://localhost:3000/ads">...</a>{idAds}/comment
      * Добавление комментария к объявлению.
-     * @param adsId идентификатор объявления
+     * @param idAds идентификатор объявления
      * @param adsComment комментарий
      * @return добавленный комментарий к объявлению в формате json
      */
@@ -355,14 +354,14 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping("/{adsId}/comment")
+    @PostMapping("/{idAds}/comment")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable @Min(1) Long adsId,
+    public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable @Min(1) Long idAds,
                                                        @Valid @RequestBody AdsCommentDto adsComment){
-        logger.info("Method addAdsComment is running: {} {}", adsId, adsComment);
+        logger.info("Method addAdsComment is running: {} {}", idAds, adsComment);
         AdsCommentDto newCommentDto;
         try {
-            newCommentDto = adsService.addAdsComment(adsId, adsComment);
+            newCommentDto = adsService.addAdsComment(idAds, adsComment);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
@@ -370,11 +369,11 @@ public class AdsController {
     }
 
     /**
-     * POST <a href="http://localhost:3000/ads/">...</a>{ad_pk}/comment
+     * POST <a href="http://localhost:3000/ads/">...</a>{idAds}/comment
      * Обновление отзыва(комментария) к объявлению. Объявление должно существовать.
      * Используется идентификатор объявления "ad_pk"
      * @param adsComment коментарий к объявлению
-     * @param ad_pk идентификатор объявления
+     * @param idAds идентификатор объявления
      * @param id идентификатор
      * @return обновленный комментарий в формате json
      */
@@ -388,15 +387,15 @@ public class AdsController {
                     )
             }
     )
-    @PostMapping("/{ad_pk}/comment/{id}")
+    @PostMapping("/{idAds}/comment/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
     public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody @Valid AdsCommentDto adsComment,
-                                                          @PathVariable @Min(1) Long ad_pk,
+                                                          @PathVariable @Min(1) Long idAds,
                                                           @PathVariable @Min(1) Long id) {
-        logger.info("Method createAdsComment is running: {} {} {}", adsComment, ad_pk, id);
+        logger.info("Method createAdsComment is running: {} {} {}", adsComment, idAds, id);
         AdsCommentDto commentDto;
         try {
-            commentDto = adsService.updateAdsComment(adsComment, ad_pk, id);
+            commentDto = adsService.updateAdsComment(adsComment, idAds, id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
         }
