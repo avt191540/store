@@ -29,7 +29,7 @@ CREATE TABLE comments (
 
 -- changeSet yuvis:4
 CREATE TABLE pictures (
-    id SERIAL NOT NULL PRIMARY KEY,
+    id BIGINT NOT NULL PRIMARY KEY,
     file_path TEXT NULL,
     file_size INTEGER NULL,
     media_type VARCHAR(255),

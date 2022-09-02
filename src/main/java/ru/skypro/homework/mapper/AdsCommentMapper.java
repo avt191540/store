@@ -6,7 +6,6 @@ import org.mapstruct.factory.Mappers;
 import ru.skypro.homework.dto.AdsCommentDto;
 import ru.skypro.homework.model.Ads;
 import ru.skypro.homework.model.AdsComment;
-import ru.skypro.homework.model.User;
 
 import java.util.Collection;
 

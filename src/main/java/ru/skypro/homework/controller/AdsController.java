@@ -8,11 +8,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.NotFoundException;
 import ru.skypro.homework.service.AdsService;
@@ -20,6 +24,8 @@ import ru.skypro.homework.service.CommentService;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
 
 @Slf4j
 @CrossOrigin(value = "http://localhost:3000")
@@ -52,11 +58,7 @@ public class AdsController {
     @GetMapping()
     public ResponseEntity<ResponseWrapperAds> getAllAds() {
         logger.info("Method getAllAds is running");
-        ResponseWrapperAds wrapperAds = adsService.getAllAds();
-        if (wrapperAds.getResults().isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(wrapperAds);
+        return ResponseEntity.ok(adsService.getAllAds());
     }
 
     /**
@@ -77,17 +79,14 @@ public class AdsController {
     @GetMapping(value = "/title", params = {"input"})
     public ResponseEntity<ResponseWrapperAds> getAllAdsByTitle(@RequestParam String input) {
         logger.info("Method getAllAds is running");
-        ResponseWrapperAds wrapperAds = adsService.getAllAdsByTitle(input);
-        if (wrapperAds.getResults().isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(wrapperAds);
+        return ResponseEntity.ok(adsService.getAllAdsByTitle(input));
     }
 
     /**
      * POST <a href="http://localhost:3000/ads">...</a>
      * Добавление объявления.
-     * @param createAds объявление
+     * @param createAdsDto объявление
+     * @param file картинка к объявлению
      * @return добавленное объявление в формате json
      */
    @Operation(
@@ -100,11 +99,21 @@ public class AdsController {
                     )
             }
     )
-   @PostMapping
-   @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-   public ResponseEntity<AdsDto> addAds(@RequestBody @Valid CreateAdsDto createAds) {
-        logger.info("Method addAds is running: {}", createAds);
-        return ResponseEntity.ok(adsService.addAds(createAds));
+   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+   @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+   public ResponseEntity<AdsDto> addAds(@RequestPart("properties") @Valid CreateAdsDto createAdsDto,
+                                        @RequestPart("image") @Valid @NotNull MultipartFile file) {
+        logger.info("Method addAds is running: {} {}", createAdsDto, file);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+       AdsDto newAds;
+        try {
+            newAds = adsService.addAds(auth, createAdsDto, file);
+        }catch (NotFoundException e){
+            return ResponseEntity.notFound().build();
+        }catch (IOException e){
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.ok(newAds);
    }
 
     /**
@@ -123,10 +132,9 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/me", params = {"input"})
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ResponseWrapperAds> getAdsMeByTitle(Authentication auth, String input){
         logger.info("Method getAdsMe is running: {} {}", auth, input);
-
         ResponseWrapperAds wrapperAds = adsService.getAdsMeByTitle(auth.getName(), input);
         if (wrapperAds.getResults().isEmpty()){
             return ResponseEntity.notFound().build();
@@ -137,7 +145,6 @@ public class AdsController {
     /**
      * Получить все объявления автора GET <a href="http://localhost:3000/ads">...</a>
      * Получить объявления автора содержащие определенную строку.
-     * @param auth данные аутентифицированного пользователя
      * @return возвращаемая коллекция объявлений
      **/
     @Operation(
@@ -151,14 +158,11 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<ResponseWrapperAds> getAdsMe(Authentication auth){
-        logger.info("Method getAdsMe is running: {}", auth);
-
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<ResponseWrapperAds> getAdsMe(){
+        logger.info("Method getAdsMe is running");
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         ResponseWrapperAds wrapperAds = adsService.getAdsMe(auth.getName());
-        if (wrapperAds.getResults().isEmpty()){
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(wrapperAds);
     }
 
@@ -178,7 +182,7 @@ public class AdsController {
             }
     )
     @GetMapping(value = "/{idAds}/comment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<ResponseWrapperAdsComment> getAdsComments(@PathVariable @Min(1) Long idAds) {
         logger.info("Method getAdsComments is running: {}", idAds);
         ResponseWrapperAdsComment wrapperAdsComment = commentService.getAdsComments(idAds);
@@ -206,7 +210,7 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{idAds}/comment/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> deleteAdsComment(@PathVariable @Min(1) Long idAds, @PathVariable @Min(1) Long id){
         logger.info("Method deleteAdsComment is running: {} {}", idAds, id);
         try {
@@ -235,7 +239,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{idAds}/comment/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<AdsCommentDto> getAdsComment(@PathVariable @Min(1) Long idAds, @PathVariable @Min(1) Long id){
         logger.info("Method getAdsComment is running: {} {}", idAds, id);
         AdsCommentDto foundAdsComment;
@@ -264,13 +268,15 @@ public class AdsController {
             }
     )
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<?> removeAds(@PathVariable @Min(1) Long id) {
         logger.info("Method removeAds is running: {}", id);
         try {
             adsService.removeAds(id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.status(HttpStatus.OK).build();
     }
@@ -291,7 +297,7 @@ public class AdsController {
             }
     )
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<FullAdsDto> getAds(@PathVariable @Min(1) Long id) {
         logger.info("Method getAds is running: {}", id);
         FullAdsDto adsDto;
@@ -299,6 +305,8 @@ public class AdsController {
             adsDto = adsService.getAds(id);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(adsDto);
     }
@@ -319,14 +327,17 @@ public class AdsController {
             }
     )
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<AdsDto> updateAds(@RequestBody @Valid AdsDto adsDto, @PathVariable @Min(1) Long id) {
-        logger.info("Method updateAds is running: {} {}", adsDto, id);
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<AdsDto> updateAds(@PathVariable @Min(1) Long id,
+                                            @RequestBody @Valid AdsDto adsDto) {
+        logger.info("Method updateAds is running: {} {}", id, adsDto);
         AdsDto adsUpdatedDto;
         try {
-            adsUpdatedDto = adsService.updateAds(adsDto, id);
+            adsUpdatedDto = adsService.updateTextAds(id, adsDto);
         }catch (NotFoundException e){
             return ResponseEntity.notFound().build();
+        } catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(adsUpdatedDto);
     }
@@ -349,7 +360,7 @@ public class AdsController {
             }
     )
     @PostMapping("/{idAds}/comment")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<AdsCommentDto> addAdsComment(@PathVariable @Min(1) Long idAds,
                                                        @Valid @RequestBody AdsCommentDto adsComment){
         logger.info("Method addAdsComment is running: {} {}", idAds, adsComment);
@@ -382,7 +393,7 @@ public class AdsController {
             }
     )
     @PostMapping("/{idAds}/comment/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<AdsCommentDto> updateAdsComment(@RequestBody @Valid AdsCommentDto adsComment,
                                                           @PathVariable @Min(1) Long idAds,
                                                           @PathVariable @Min(1) Long id) {

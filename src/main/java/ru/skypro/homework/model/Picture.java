@@ -1,11 +1,9 @@
 package ru.skypro.homework.model;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
 import javax.persistence.*;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -19,17 +17,18 @@ import java.util.Objects;
 public class Picture {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_picture", unique = true)
+    @Column(name = "ads_id")
     private Long id;
-    private Integer fileSize;
+    private Long fileSize;
     private String filePath;
     private String mediaType;
     @Lob
     private byte[] data;
 
-    @ManyToOne
-    @JoinColumn(name = "id_ads")
+    @OneToOne
+    @MapsId
+    @JoinColumn(name = "ads_id")
+    //@JsonIgnore
     private Ads ads;
 
 
