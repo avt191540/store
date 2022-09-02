@@ -34,10 +34,10 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public ResponseWrapperAdsComment getAdsComments(Long id) {
         logger.info("Method getAdsComment was started: {}", id);
-        Collection<AdsCommentDto> adsComments = commentMapper.entitiesToDto(commentRepository
-                .findAdsCommentsByAds_IdOrderByCreatedAtDesc(id));
+        Collection<AdsCommentDto> adsComments = commentMapper.entitiesToDto(commentRepository.findAdsCommentsByAds_IdOrderByCreatedAtDesc(id));
         ResponseWrapperAdsComment wrapperAdsComment = new ResponseWrapperAdsComment();
         wrapperAdsComment.setCount(adsComments.size());
         wrapperAdsComment.setResults(adsComments);
@@ -54,7 +54,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public AdsCommentDto getAdsComment(Long idAds, Long id) throws NotFoundException {
-        AdsComment foundComment = commentRepository.findAdsCommentByIdAndAds_Id(idAds, id).orElseThrow(NotFoundException::new);
+        AdsComment foundComment = commentRepository.findById(id).orElseThrow(NotFoundException::new);
         return commentMapper.entityToDto(foundComment);
     }
 

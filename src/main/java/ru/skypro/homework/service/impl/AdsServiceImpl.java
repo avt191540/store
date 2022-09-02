@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.exception.NotFoundException;
@@ -58,12 +59,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
+    @Transactional
     public ResponseWrapperAds getAllAdsByTitle(String input) {
         Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.findAllByTitleContainsIgnoreCase(input));
         return getWrapperAds(adsDtoCollection);
     }
 
     @Override
+    @Transactional
     public ResponseWrapperAds getAdsMeByTitle(String username, String input) {
         Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository
                 .findAllByUser_UsernameAndTitleContainsIgnoreCase(username, input));
@@ -71,12 +74,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
+    @Transactional
     public ResponseWrapperAds getAllAds() {
         Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.getAllAds());
         return getWrapperAds(adsDtoCollection);
     }
 
     @Override
+    @Transactional
     public ResponseWrapperAds getAdsMe(String username) {
         Collection<AdsDto> adsDtoCollection = adsMapper.entitiesToDto(adsRepository.findAllByUser_Username(username));
         return getWrapperAds(adsDtoCollection);
@@ -100,6 +105,7 @@ public class AdsServiceImpl implements AdsService {
         ads.setTitle(adsDto.getTitle());
         ads.setDescription(adsDto.getDescription());
         ads.setPrice(adsDto.getPrice());
+        ads.setImage(adsDto.getImage());
         return adsMapper.adsToAdsDto(adsRepository.save(ads));
     }
 

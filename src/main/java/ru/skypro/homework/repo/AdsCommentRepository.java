@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import ru.skypro.homework.model.AdsComment;
 
 import java.util.Collection;
-import java.util.Optional;
 
 public interface AdsCommentRepository extends JpaRepository<AdsComment, Long> {
 
@@ -14,9 +13,9 @@ public interface AdsCommentRepository extends JpaRepository<AdsComment, Long> {
 
     @Modifying
     @Query("delete from AdsComment where ads.id = :idAds and id = :idComment")
-    int deleteCommentToAdsById(Long idAds, Long idComment);
 
-    Optional<AdsComment> findAdsCommentByIdAndAds_Id(Long idAds, Long idComment);
+
+    int deleteCommentToAdsById(Long idAds, Long idComment);
 
     boolean existsAdsCommentById(Long id);
 }

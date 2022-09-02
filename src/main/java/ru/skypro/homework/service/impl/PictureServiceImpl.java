@@ -65,7 +65,7 @@ public class PictureServiceImpl implements PictureService {
         picture.setAds(ads);
         picture.setFileSize(file.getSize());
         picture.setMediaType(file.getContentType());
-        picture.setFilePath("/api/picture" + ads.getId().toString());
+        picture.setFilePath("/api/picture/" + ads.getId().toString());
         return pictureRepository.saveAndFlush(picture);
     }
 
