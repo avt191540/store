@@ -82,12 +82,14 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void changePassword(String userName, String currentPassword, String newPassword) throws NotFoundException {
+        logger.info("Start changePassword method: {} {} {}", userName, currentPassword, newPassword);
         String encryptedPassword = getEncryptedPassword(userName);
         String encryptedPasswordWithoutEncryptionType = encryptedPassword.substring(8);
         if (encoder.matches(currentPassword, encryptedPasswordWithoutEncryptionType)){
-            userService.savePassword(userName, newPassword);
+            userService.savePassword(userName, "{bcrypt}" + encoder.encode(newPassword));
+        } else {
+            throw new AccessDeniedException("Your put down invalid password");
         }
-        throw new AccessDeniedException("Your put down invalid password");
     }
 
     @Override
@@ -106,8 +108,13 @@ public class AuthServiceImpl implements AuthService {
         authoritiesService.saveAuthority(authority);
     }
 
-    private String getEncryptedPassword(String userName) {
-        UserDetails userDetails = manager.loadUserByUsername(userName);
-        return userDetails.getPassword();
+    private String getEncryptedPassword(String username) throws NotFoundException {
+        logger.info("getEncryptedPassword was started: {}", username);
+        if (manager.userExists(username)) {
+            UserDetails userDetails = manager.loadUserByUsername(username);
+            logger.info("getPassword: {}", userDetails.getPassword());
+            return userDetails.getPassword();
+        }
+        throw new NotFoundException("This user with the login " + username + " was not found");
     }
 }

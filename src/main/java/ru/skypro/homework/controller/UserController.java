@@ -39,8 +39,6 @@ public class UserController {
 
     private final AuthService authService;
 
-    private final Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-
     /**
      * Получить пользователя по его идентификатору, то-есть по id
      * GET <a href="http://localhost:3000/users/">...</a>{id}
@@ -57,7 +55,7 @@ public class UserController {
             }
     )
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<UserDto> getUser(@PathVariable @Min(1) Long id){
         logger.info("Method getUser is running: {}", id);
         UserDto foundUserDto;
@@ -84,15 +82,18 @@ public class UserController {
             }
     )
     @PatchMapping("/me")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
     public ResponseEntity<UserDto> updateUser(@RequestBody @Valid UserDto user){
         logger.info("Method updateUser is running: {}", user);
         UserDto updateUser;
         try {
-            updateUser = userService.updateUser(auth.getName(), user);
+            updateUser = userService.updateUser(user);
         }
         catch (NotFoundException e){
             return ResponseEntity.notFound().build();
+        }
+        catch (AccessDeniedException e){
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         return ResponseEntity.ok(updateUser);
     }
@@ -112,9 +113,10 @@ public class UserController {
             }
     )
     @PostMapping("/set_password")
-    @PreAuthorize("hasAnyRole('ADMIN', 'USER')")
-    public ResponseEntity<NewPasswordDto> setPassword(@RequestBody NewPasswordDto password){
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN', 'ROLE_USER')")
+    public ResponseEntity<NewPasswordDto> setPassword(@Valid @RequestBody NewPasswordDto password){
         logger.info("Method setPassword is running: {}", password);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         try {
             authService.changePassword(auth.getName(), password.getCurrentPassword(), password.getNewPassword());
         } catch (NotFoundException e){
@@ -133,12 +135,9 @@ public class UserController {
             description = "Позволяет получить всех пользователей из базы данных"
     )
     @GetMapping("/me")
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public ResponseEntity<ResponseWrapperUser> getUsers(){
         logger.info("Method getUsers is running");
-        if (userService.getAllUsers().getResults().isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
         return ResponseEntity.ok(userService.getAllUsers());
     }
 }

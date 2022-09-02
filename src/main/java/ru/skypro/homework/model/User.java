@@ -30,6 +30,7 @@ public class User {
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     @PrimaryKeyJoinColumn
+    @JsonIgnore
     private Authorities authority;
 
     @OneToMany(mappedBy = "user", cascade=CascadeType.ALL)

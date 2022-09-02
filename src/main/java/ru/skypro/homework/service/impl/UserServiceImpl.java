@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.skypro.homework.dto.CreateUserDto;
 import ru.skypro.homework.dto.ResponseWrapperUser;
 import ru.skypro.homework.dto.UserDto;
 import ru.skypro.homework.exception.NotFoundException;
@@ -27,15 +26,9 @@ public class UserServiceImpl implements UserService {
         this.userMapper = userMapper;
     }
 
-    public UserDto addUser(CreateUserDto createUserDto){
-        User user = userMapper.createUserDtoToUser(createUserDto);
-        userRepository.save(user);
-        return userMapper.userToUserDto(user);
-    }
-
-    public UserDto updateUser(String username,UserDto userDto) throws NotFoundException {
+    public UserDto updateUser(UserDto userDto) throws NotFoundException{
         logger.info("Method updateUser was started");
-        User user = userRepository.getUserByUsername(username).orElseThrow(NotFoundException::new);
+        User user = userRepository.findById(userDto.getId()).orElseThrow(NotFoundException::new);
         user.setFirstName(userDto.getFirstName());
         user.setLastName(userDto.getLastName());
         user.setPhone(userDto.getPhone());
@@ -53,10 +46,13 @@ public class UserServiceImpl implements UserService {
     @Transactional
     @Override
     public void savePassword(String username, String newPassword) throws NotFoundException {
+        logger.info("UserService savePassword method was running: {} {}", username, newPassword);
         if (userRepository.existsUserByUsername(username)) {
             userRepository.updatePassword(username, newPassword);
         }
-        throw new NotFoundException();
+        else {
+            throw new NotFoundException();
+        }
     }
 
     @Transactional

@@ -15,31 +15,31 @@ import java.util.Collection;
 public interface AdsMapper {
     AdsMapper INSTANCE = Mappers.getMapper(AdsMapper.class);
 
-    @Mapping(source = "createAdsDto.idAuthor", target = "user.id")
     @Mapping(source = "createAdsDto.title", target = "title")
     @Mapping(source = "createAdsDto.description", target = "description")
     @Mapping(source = "createAdsDto.price", target = "price")
+    @Mapping(source = "createAdsDto.image", target = "image")
     Ads createAdsDtoToAds(CreateAdsDto createAdsDto);
 
     @Mapping(source = "ads.title", target = "title")
     @Mapping(source = "ads.price", target = "price")
     @Mapping(source = "ads.user.id", target = "idAuthor")
     @Mapping(source = "ads.id", target = "pk")
-    @Mapping(source = "ads.pictures", target = "image")
+    @Mapping(source = "ads.image", target = "image")
     AdsDto adsToAdsDto(Ads ads);
 
     @Mapping(source = "adsDto.title", target = "title")
     @Mapping(source = "adsDto.price", target = "price")
     @Mapping(source = "adsDto.idAuthor", target = "user.id")
     @Mapping(source = "adsDto.pk", target = "id")
-    @Mapping(source = "adsDto.image", target = "pictures")
+    @Mapping(source = "adsDto.image", target = "image")
     Ads adsDtoToAds(AdsDto adsDto);
 
     @Mapping(source = "ads.title", target = "title")
     @Mapping(source = "ads.price", target = "price")
     @Mapping(source = "ads.description", target = "description")
     @Mapping(source = "ads.id", target = "pk")
-    @Mapping(source = "ads.pictures", target = "image")
+    @Mapping(source = "ads.image", target = "image")
     @Mapping(source = "user.firstName", target = "authorFirstName")
     @Mapping(source = "user.lastName", target = "authorLastName")
     @Mapping(source = "user.phone", target = "phone")

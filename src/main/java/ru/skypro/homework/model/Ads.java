@@ -19,19 +19,21 @@ public class Ads {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_ads", unique = true)
+    @Column(name = "id_ads")
     private Long id;
     private String title;
     private String description;
     private Integer price;
+    private String image;
     @ManyToOne
     @JoinColumn(name = "id_user")
+    //@JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "ads", cascade=CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "ads", cascade=CascadeType.ALL)
     @JsonIgnore
-    @ToString.Exclude
-    private Collection<Picture> pictures;
+    @PrimaryKeyJoinColumn
+    private Picture picture;
 
     @OneToMany(mappedBy = "ads", cascade=CascadeType.ALL)
     @JsonIgnore
